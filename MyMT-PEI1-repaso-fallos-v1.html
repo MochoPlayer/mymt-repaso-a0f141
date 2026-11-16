@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MyMT PEI1 · Repaso de fallos (PEC1 Teoría 2025)</title>
+<style>
+:root{
+  --bg:#0f1220; --panel:#171b2e; --panel2:#1f2440; --ink:#e8ebf7; --mute:#9aa3c7;
+  --acc:#ffb347; --blue:#5aa9ff; --green:#4cd28a; --red:#ff6b6b; --violet:#b48cff; --line:#2c3358;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,Segoe UI,Roboto,sans-serif}
+a{color:var(--blue)}
+.layout{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+nav{position:sticky;top:0;height:100vh;overflow:auto;background:#0b0e1a;border-right:1px solid var(--line);padding:18px 14px}
+nav h1{font-size:15px;margin:0 0 4px;color:var(--acc)}
+nav .sub{font-size:12px;color:var(--mute);margin-bottom:14px}
+nav a{display:flex;justify-content:space-between;gap:6px;padding:7px 9px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:14px}
+nav a:hover{background:var(--panel2)}
+nav a .tag{font-size:11px;color:var(--mute)}
+nav a.done .tag{color:var(--green)}
+main{padding:28px 40px 80px;max-width:1050px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin:0 0 26px}
+h2{margin:0 0 6px;font-size:22px}
+h2 small{font-size:13px;color:var(--mute);font-weight:400;margin-left:8px}
+h3{margin:18px 0 8px;font-size:16px;color:var(--acc)}
+.rule{background:linear-gradient(90deg,rgba(255,179,71,.14),transparent);border-left:4px solid var(--acc);padding:12px 16px;border-radius:8px;margin:12px 0;font-size:17px}
+.miss{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.35);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:14px}
+.miss b{color:var(--red)}
+.miss .ok{color:var(--green);font-weight:600}
+.src{font-size:12px;color:var(--mute)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.card{background:var(--panel2);border-radius:12px;padding:14px 16px;border:1px solid var(--line)}
+.card h4{margin:0 0 6px;font-size:15px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--panel2);color:var(--acc);font-weight:600}
+td.k{color:var(--mute);width:24%}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;margin-right:4px}
+.p-b{background:rgba(90,169,255,.18);color:var(--blue)}
+.p-o{background:rgba(255,179,71,.18);color:var(--acc)}
+.p-g{background:rgba(76,210,138,.18);color:var(--green)}
+.p-r{background:rgba(255,107,107,.18);color:var(--red)}
+svg text{font-family:system-ui,Segoe UI,sans-serif}
+.svgbox{background:#12162a;border-radius:12px;border:1px solid var(--line);padding:8px;margin:10px 0}
+/* quiz */
+.q{background:#12162a;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.q .qh{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);margin-bottom:4px}
+.q .qt{font-weight:600;margin-bottom:8px}
+.q button.opt{display:block;width:100%;text-align:left;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:5px 0;cursor:pointer;font:inherit;font-size:15px}
+.q button.opt:hover:not([disabled]){border-color:var(--blue)}
+.q button.opt.right{border-color:var(--green);background:rgba(76,210,138,.15)}
+.q button.opt.wrong{border-color:var(--red);background:rgba(255,107,107,.15)}
+.q button.opt[disabled]{cursor:default}
+.q .why{display:none;margin-top:8px;font-size:14px;color:#cfd5f0;border-top:1px dashed var(--line);padding-top:8px}
+.q.answered .why{display:block}
+.q .skip{background:none;border:none;color:var(--mute);font-size:13px;cursor:pointer;padding:4px 0}
+.bar{position:sticky;top:0;z-index:5;background:rgba(15,18,32,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);margin:-28px -40px 24px;padding:10px 40px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar .s{font-size:14px}
+.bar .s b{font-size:18px}
+.btn{background:var(--acc);color:#1a1300;border:none;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:14px}
+.btn.ghost{background:transparent;color:var(--mute);border:1px solid var(--line);font-weight:500}
+#exportBox{display:none;width:100%;height:220px;margin-top:10px;background:#0b0e1a;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;font:12px/1.4 Consolas,monospace}
+input[type=range]{width:100%}
+.big{font-size:28px;font-weight:700}
+.kpi{display:flex;gap:14px;flex-wrap:wrap}
+.kpi .card{min-width:130px;text-align:center}
+@media (max-width:900px){.layout{grid-template-columns:1fr}nav{position:static;height:auto}.grid2,.grid3{grid-template-columns:1fr}main{padding:20px}.bar{margin:-20px -20px 20px;padding:10px 20px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+  <h1>MyMT PEI1 · Repaso</h1>
+  <div class="sub">Examen mar 17 nov 08:30 · T1 + T2<br>Basado en tus fallos del PEC1 Teoría 2025</div>
+  <a href="#c0">0 · Tu resultado <span class="tag">leer</span></a>
+  <a href="#c1" data-c="c1">1 · Máquinas térmicas <span class="tag">Q2 Q9</span></a>
+  <a href="#c2" data-c="c2">2 · Motores térmicos <span class="tag">Q1 Q15</span></a>
+  <a href="#c3" data-c="c3">3 · MEP vs MEC <span class="tag">Q13 Q16</span></a>
+  <a href="#c4" data-c="c4">4 · Mezcla y regulación <span class="tag">Q3 Q5</span></a>
+  <a href="#c5" data-c="c5">5 · 2T vs 4T <span class="tag">Q4 Q10</span></a>
+  <a href="#c6" data-c="c6">6 · Refrigeración <span class="tag">Q17</span></a>
+  <a href="#c7" data-c="c7">7 · Balance energético <span class="tag">Q14</span></a>
+  <a href="#c8" data-c="c8">8 · r y rendimiento <span class="tag">Q6</span></a>
+  <a href="#c9" data-c="c9">9 · Órdenes de magnitud <span class="tag">Q12</span></a>
+  <a href="#c10">10 · Chuleta final <span class="tag">leer</span></a>
+</nav>
+
+<main>
+<div class="bar">
+  <span class="s">Respondidas <b id="sAns">0</b>/<span id="sTot">0</span></span>
+  <span class="s">Bien <b id="sOk" style="color:var(--green)">0</b></span>
+  <span class="s">Mal <b id="sKo" style="color:var(--red)">0</b></span>
+  <span class="s">Nota neta <b id="sNet">0</b></span>
+  <button class="btn" onclick="exportAnswers()">⧉ Exportar respuestas</button>
+  <button class="btn ghost" onclick="resetAll()">Reiniciar</button>
+  <textarea id="exportBox" readonly></textarea>
+</div>
+
+<!-- 0 -->
+<section id="c0">
+  <h2>0 · Dónde estás</h2>
+  <div class="kpi">
+    <div class="card"><div class="big" style="color:var(--green)">4</div>bien</div>
+    <div class="card"><div class="big" style="color:var(--red)">11</div>mal</div>
+    <div class="card"><div class="big" style="color:var(--mute)">3</div>en blanco</div>
+    <div class="card"><div class="big" style="color:var(--red)">−1,5</div>nota neta /18</div>
+  </div>
+  <div class="rule">Cada fallo resta <b>1/(n−1)</b>, donde n es el número de opciones: −1/3 con 4 opciones, −1/2 con 3 y −1 con V/F. Si contestas al azar, de media sacas 0. Contesta solo si puedes <b>descartar al menos una opción</b>.</div>
+  <p>Tus 4 aciertos dieron +4 y los 11 fallos restaron 5,5. Con esas 11 preguntas en blanco habrías sacado +4. Para el martes, esto vale tanto como estudiar.</p>
+  <p class="src">Las claves del PEC1 2025 no están en la fuente (Wuolah). Las respuestas de esta página salen de las diapositivas T1 y T2 de 2026 y son <b>razonadas, no oficiales</b>. Cada tarjeta cita su diapositiva.</p>
+  <p>Cómo usar la página: lee la regla de cada tarjeta, mira el dibujo y contesta sus preguntas. Al final pulsa <b>Exportar respuestas</b> y pega el texto en el chat. Así veo qué falta.</p>
+</section>
+
+<!-- 1 -->
+<section id="c1">
+  <h2>1 · Máquina térmica: motora/generadora × volumétrica/turbo <small>T1 diap. 4–13</small></h2>
+  <div class="rule">Una <b>máquina térmica</b> USA un fluido compresible que ya está caliente o presurizado. Un <b>motor térmico</b> CREA ese estado térmico (combustión, nuclear, solar). Para clasificar una máquina, haz dos preguntas: ¿saca trabajo o lo mete? ¿Volumen cerrado o álabes?</div>
+  <div class="svgbox">
+  <svg viewBox="0 0 900 330" width="100%">
+    <text x="450" y="22" fill="#9aa3c7" font-size="13" text-anchor="middle">¿Energía mecánica? →</text>
+    <rect x="200" y="32" width="330" height="40" rx="8" fill="#1f3a2e"/><text x="365" y="57" fill="#4cd28a" font-size="15" text-anchor="middle" font-weight="700">MOTORA (expansor) · SACAS trabajo</text>
+    <rect x="550" y="32" width="330" height="40" rx="8" fill="#3a2a1a"/><text x="715" y="57" fill="#ffb347" font-size="15" text-anchor="middle" font-weight="700">GENERADORA (compresor) · METES trabajo</text>
+    <rect x="20" y="85" width="170" height="110" rx="8" fill="#1d2a45"/><text x="105" y="122" fill="#5aa9ff" font-size="15" text-anchor="middle" font-weight="700">VOLUMÉTRICA</text>
+    <text x="105" y="143" fill="#9aa3c7" font-size="12" text-anchor="middle">volumen que cambia</text><text x="105" y="160" fill="#9aa3c7" font-size="12" text-anchor="middle">flujo discontinuo · poco caudal</text><text x="105" y="177" fill="#9aa3c7" font-size="12" text-anchor="middle">NO adiabática</text>
+    <rect x="20" y="205" width="170" height="110" rx="8" fill="#2d1d45"/><text x="105" y="242" fill="#b48cff" font-size="15" text-anchor="middle" font-weight="700">TURBOMÁQUINA</text>
+    <text x="105" y="263" fill="#9aa3c7" font-size="12" text-anchor="middle">álabes rotor + estator</text><text x="105" y="280" fill="#9aa3c7" font-size="12" text-anchor="middle">flujo continuo · gran caudal</text><text x="105" y="297" fill="#9aa3c7" font-size="12" text-anchor="middle">adiabática</text>
+    <rect x="200" y="85" width="330" height="110" rx="8" fill="#151a30" stroke="#2c3358"/>
+    <text x="215" y="112" fill="#e8ebf7" font-size="14">• Expansor scroll / tornillo (ORC pequeño)</text>
+    <text x="215" y="136" fill="#e8ebf7" font-size="14">• Cilindro de la máquina de vapor</text>
+    <text x="215" y="160" fill="#e8ebf7" font-size="14">• Expansor alternativo (pistón)</text>
+    <text x="215" y="184" fill="#9aa3c7" font-size="12">alternativas o rotativas</text>
+    <rect x="550" y="85" width="330" height="110" rx="8" fill="#151a30" stroke="#ffb347" stroke-width="2"/>
+    <text x="565" y="112" fill="#e8ebf7" font-size="14">• Compresor de pistón</text>
+    <text x="565" y="136" fill="#ffb347" font-size="14" font-weight="700">• Compresor SCROLL del aire acondicionado ← Q9</text>
+    <text x="565" y="160" fill="#e8ebf7" font-size="14">• Tornillo, paletas, roots (sin compr. interna)</text>
+    <text x="565" y="184" fill="#9aa3c7" font-size="12">scroll, tornillo, paletas, roots = rotativas</text>
+    <rect x="200" y="205" width="330" height="110" rx="8" fill="#151a30" stroke="#2c3358"/>
+    <text x="215" y="235" fill="#e8ebf7" font-size="14">• Turbina de vapor (la máquina)</text>
+    <text x="215" y="259" fill="#e8ebf7" font-size="14">• Turbina de un turbo (lado escape)</text>
+    <text x="215" y="283" fill="#e8ebf7" font-size="14">• Turbina axial / radial</text>
+    <rect x="550" y="205" width="330" height="110" rx="8" fill="#151a30" stroke="#2c3358"/>
+    <text x="565" y="235" fill="#e8ebf7" font-size="14">• Turbocompresor axial</text>
+    <text x="565" y="259" fill="#e8ebf7" font-size="14">• Compresor centrífugo de un turbo</text>
+    <text x="565" y="283" fill="#e8ebf7" font-size="14">• Compresor de una turbina de gas</text>
+  </svg>
+  </div>
+  <div class="miss"><b>Q2.</b> "Aprovechar un alto nivel de energía térmica de una corriente de fluido compresible". Tú: <i>motor térmico</i>. Razonada: <span class="ok">máquina térmica motora, volumétrica o turbomáquina</span>. La corriente ya está caliente: nadie tiene que crear el estado térmico. Solo hay que expandirla.</div>
+  <div class="miss"><b>Q9.</b> Compresor scroll de bomba de calor. Tú: <i>ninguna</i>. Razonada: <span class="ok">generadora, volumétrica, rotativa</span>. Es un compresor, así que metes trabajo. Es un scroll, que es volumétrico rotativo con compresión interna (diap. 11).</div>
+  <div class="quiz" data-c="c1"></div>
+</section>
+
+<!-- 2 -->
+<section id="c2">
+  <h2>2 · Motor térmico: interna/externa, abierto/cerrado, eje/reacción <small>T1 diap. 15–19, 36–38</small></h2>
+  <div class="rule"><b>Externa</b> = pared (intercambiador) + ciclo cerrado posible + cualquier combustible + baja potencia específica + η sobre Q<sub>h</sub>.<br><b>Interna</b> = llama dentro del fluido + ciclo ABIERTO obligatorio + combustible de calidad + alta potencia específica + η sobre ṁ<sub>f</sub>H<sub>c</sub>.</div>
+  <div class="svgbox">
+  <svg viewBox="0 0 900 260" width="100%">
+    <text x="225" y="22" fill="#5aa9ff" font-size="16" font-weight="700" text-anchor="middle">COMBUSTIÓN EXTERNA</text>
+    <rect x="40" y="40" width="130" height="90" rx="8" fill="#3a1d1d"/><text x="105" y="70" fill="#ff6b6b" font-size="13" text-anchor="middle">caldera / llama</text>
+    <path d="M80 120 q10 -30 25 -10 q10 -25 25 0" stroke="#ff6b6b" fill="none" stroke-width="3"/>
+    <rect x="170" y="40" width="10" height="90" fill="#9aa3c7"/><text x="175" y="148" fill="#9aa3c7" font-size="11" text-anchor="middle">PARED</text>
+    <rect x="180" y="40" width="120" height="90" rx="8" fill="#1d2a45"/><text x="240" y="80" fill="#5aa9ff" font-size="13" text-anchor="middle">fluido de</text><text x="240" y="96" fill="#5aa9ff" font-size="13" text-anchor="middle">trabajo (agua)</text>
+    <path d="M300 85 h60" stroke="#5aa9ff" stroke-width="3" marker-end="url(#ar)"/><rect x="360" y="60" width="70" height="50" rx="6" fill="#2d1d45"/><text x="395" y="90" fill="#b48cff" font-size="12" text-anchor="middle">turbina</text>
+    <path d="M395 110 v40 h-155 v-20" stroke="#5aa9ff" stroke-width="2" fill="none" stroke-dasharray="5 4" marker-end="url(#ar)"/><text x="320" y="168" fill="#9aa3c7" font-size="12" text-anchor="middle">vuelve: ciclo CERRADO</text>
+    <text x="40" y="200" fill="#e8ebf7" font-size="13">η<tspan font-size="10" dy="3">t</tspan><tspan dy="-3"> = Ẇe / Q̇h</tspan></text>
+    <text x="40" y="222" fill="#9aa3c7" font-size="12">Turbina de vapor · Máquina de vapor · Stirling · ORC</text>
+    <text x="40" y="242" fill="#9aa3c7" font-size="12">T máx limitada · baja potencia específica · cualquier combustible</text>
+
+    <line x1="455" y1="10" x2="455" y2="250" stroke="#2c3358"/>
+    <text x="680" y="22" fill="#ffb347" font-size="16" font-weight="700" text-anchor="middle">COMBUSTIÓN INTERNA</text>
+    <text x="490" y="78" fill="#9aa3c7" font-size="12">aire</text><path d="M490 85 h60" stroke="#9aa3c7" stroke-width="3" marker-end="url(#ar)"/>
+    <text x="490" y="118" fill="#9aa3c7" font-size="12">ṁf·Hc</text><path d="M520 108 h30 v-10" stroke="#ffb347" stroke-width="2" fill="none"/>
+    <rect x="550" y="45" width="150" height="80" rx="8" fill="#3a2a1a"/><text x="625" y="75" fill="#ffb347" font-size="13" text-anchor="middle">la llama está</text><text x="625" y="92" fill="#ffb347" font-size="13" text-anchor="middle">DENTRO del fluido</text>
+    <path d="M600 118 q10 -25 25 -8 q10 -22 25 0" stroke="#ff6b6b" fill="none" stroke-width="3"/>
+    <path d="M700 85 h60" stroke="#ff6b6b" stroke-width="3" marker-end="url(#ar)"/><text x="770" y="80" fill="#ff6b6b" font-size="12">gases</text><text x="770" y="96" fill="#ff6b6b" font-size="12">a la atmósfera</text>
+    <text x="625" y="150" fill="#9aa3c7" font-size="12" text-anchor="middle">el fluido cambia químicamente → no puede reutilizarse → ABIERTO</text>
+    <text x="490" y="200" fill="#e8ebf7" font-size="13">η<tspan font-size="10" dy="3">t</tspan><tspan dy="-3"> = Ẇe / (ṁf · Hc)</tspan></text>
+    <text x="490" y="222" fill="#9aa3c7" font-size="12">MCIA · Turbina de gas · Wankel · aerorreactores</text>
+    <text x="490" y="242" fill="#9aa3c7" font-size="12">T máx muy alta · alta potencia específica · combustible de calidad</text>
+    <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#9aa3c7"/></marker></defs>
+  </svg>
+  </div>
+  <div class="grid2">
+    <div class="card"><h4>Según cómo sale la potencia</h4><b>Eje rotativo</b>: Ẇ = M·ω. Pueden ser volumétricos (MCIA, Wankel) o de flujo continuo (TG, TV).<br><b>Reacción</b>: empuje de un chorro, solo para propulsión. Los <i>cohetes</i> llevan su propio comburente y funcionan en el vacío. Los <i>aerorreactores</i> usan aire. Sin compresor (estato, pulso) no arrancan desde parado.<br><span class="src">El turbohélice NO es aerorreactor: da potencia en eje a una hélice.</span></div>
+    <div class="card"><h4>Trampa: vapor</h4><b>Máquina de vapor</b> (diap. 36): el primer motor térmico. Combustión EXTERNA, cualquier combustible, η ≤ 5 %. Usa un pistón, así que es volumétrica.<br><b>Turbina de vapor</b> (diap. 21): también es externa, pero basada en turbomáquinas. η ≤ 45 %.</div>
+  </div>
+  <div class="miss"><b>Q1.</b> Tú: <i>"los rendimientos de los MCI solo tienen en cuenta el calor aportado al fluido"</i>. Es falso: un MCI usa la energía química ṁ<sub>f</sub>H<sub>c</sub>. La b) también es falsa: el rendimiento <i>interno de una máquina</i> no usa la energía química. La d) es falsa porque la definición depende de interna/externa, no de las máquinas que contiene. Razonada: <span class="ok">ninguna es correcta</span>.</div>
+  <div class="miss"><b>Q15.</b> Máquina de vapor. Tú: <i>turbomáquina</i>. Razonada: <span class="ok">motor térmico de combustión externa</span>.</div>
+  <div class="quiz" data-c="c2"></div>
+</section>
+
+<!-- 3 -->
+<section id="c3">
+  <h2>3 · MEP vs MEC: el par de opuestos <small>T2 diap. 13–17</small></h2>
+  <div class="rule">MEP = mezcla <b>hecha antes</b> + <b>chispa</b> + combustible <b>ligero que NO se autoinflame</b> (alto octano). Riesgo: <b>picado</b>.<br>MEC = solo <b>aire</b> + inyección <b>al final</b> + <b>autoinflamación</b> + combustible <b>pesado que SÍ se autoinflame</b>. Riesgo: <b>partículas (hollín)</b>.</div>
+  <div class="svgbox">
+  <svg viewBox="0 0 900 250" width="100%">
+    <defs><radialGradient id="soot" cx=".5" cy=".3" r=".6"><stop offset="0" stop-color="#ffb347"/><stop offset=".5" stop-color="#5a3a20"/><stop offset="1" stop-color="#1d2a45"/></radialGradient></defs>
+    <text x="225" y="22" fill="#ffb347" font-size="16" font-weight="700" text-anchor="middle">MEP · encendido provocado</text>
+    <rect x="150" y="40" width="150" height="150" fill="#ffb34755" stroke="#9aa3c7" stroke-width="3"/>
+    <rect x="150" y="170" width="150" height="20" fill="#9aa3c7"/>
+    <rect x="218" y="28" width="14" height="22" fill="#e8ebf7"/><text x="245" y="44" fill="#e8ebf7" font-size="12">bujía ⚡</text>
+    <circle cx="225" cy="70" r="30" fill="none" stroke="#ff6b6b" stroke-width="3" stroke-dasharray="6 4"/>
+    <text x="225" y="115" fill="#1a1300" font-size="12" text-anchor="middle" font-weight="700">mezcla ya hecha</text>
+    <text x="225" y="132" fill="#1a1300" font-size="12" text-anchor="middle">frente de llama →</text>
+    <text x="225" y="215" fill="#9aa3c7" font-size="12" text-anchor="middle">deflagración subsónica · subida de p "suave"</text>
+    <text x="225" y="235" fill="#ff6b6b" font-size="12" text-anchor="middle">si el resto de la mezcla se autoinflama → PICADO</text>
+
+    <text x="675" y="22" fill="#5aa9ff" font-size="16" font-weight="700" text-anchor="middle">MEC · encendido por compresión</text>
+    <rect x="600" y="40" width="150" height="150" fill="#1d2a45" stroke="#9aa3c7" stroke-width="3"/>
+    <rect x="600" y="170" width="150" height="20" fill="#9aa3c7"/>
+    <rect x="668" y="28" width="14" height="22" fill="#e8ebf7"/><text x="695" y="44" fill="#e8ebf7" font-size="12">inyector</text>
+    <path d="M675 50 l-45 70 M675 50 l0 80 M675 50 l45 70" stroke="#ffb347" stroke-width="4" opacity=".85"/>
+    <ellipse cx="640" cy="122" rx="14" ry="10" fill="url(#soot)"/><ellipse cx="710" cy="122" rx="14" ry="10" fill="url(#soot)"/>
+    <text x="675" y="155" fill="#e8ebf7" font-size="12" text-anchor="middle">aire caliente (r 15–18)</text>
+    <text x="675" y="215" fill="#9aa3c7" font-size="12" text-anchor="middle">dosado local MUY heterogéneo</text>
+    <text x="675" y="235" fill="#ff6b6b" font-size="12" text-anchor="middle">zonas ricas y calientes sin O₂ → HOLLÍN (PM)</text>
+  </svg>
+  </div>
+  <table>
+    <tr><th></th><th>MEP</th><th>MEC</th></tr>
+    <tr><td class="k">Qué entra al cilindro</td><td>Mezcla (o aire + inyección temprana)</td><td>Solo aire</td></tr>
+    <tr><td class="k">Encendido</td><td>Chispa (bujía)</td><td>Autoinflamación</td></tr>
+    <tr><td class="k">Combustible</td><td>Ligero, volátil: gasolina, GN, GLP, <b>etanol</b></td><td>Pesado, poco volátil, <b>baja T de autoinflamación</b>: gasóleo, biodiésel, <b>e-fuel pesado</b></td></tr>
+    <tr><td class="k">Inyección</td><td>Baja o media presión</td><td>Alta presión, varios chorros</td></tr>
+    <tr><td class="k">r típica</td><td>9–11</td><td>15–18</td></tr>
+    <tr><td class="k">Combustión</td><td>Frente de llama (deflagración)</td><td>Retraso → premezclada → difusión</td></tr>
+    <tr><td class="k">Problema típico</td><td>Picado (knock)</td><td>Partículas (PM), ruido de combustión</td></tr>
+    <tr><td class="k">Regulación de carga</td><td>Homogéneo: mariposa (cuantitativa)</td><td>Combustible inyectado (cualitativa)</td></tr>
+  </table>
+  <div class="miss"><b>Q13.</b> MEC. Tú: <i>pueden sufrir picado</i>. El picado es cosa del MEP. Razonada: <span class="ok">emiten muchas más partículas que los MEP</span>.</div>
+  <div class="miss"><b>Q16.</b> e-fuel pesado con alta tendencia a autoinflamarse. Tú: <i>MEP</i>. Razonada: <span class="ok">MEC</span>. En un MEP ese combustible causaría picado.</div>
+  <div class="quiz" data-c="c3"></div>
+</section>
+
+<!-- 4 -->
+<section id="c4">
+  <h2>4 · Mezcla homogénea vs estratificada y regulación de carga <small>T2 diap. 14, 50</small></h2>
+  <div class="rule">Los dos MEP comparten lo que hace a un MEP: la <b>chispa</b>. Todo lo demás cambia: dosado global, regulación y momento de inyección.<br>Homogéneo: FR ≈ 1 en todo el cilindro, por el <b>catalizador de 3 vías</b>, y regula con <b>mariposa</b>. Estratificado: FR ≈ 1 solo junto a la bujía y pobre de media; regula con <b>combustible</b>.</div>
+  <div class="svgbox">
+  <svg viewBox="0 0 900 230" width="100%">
+    <defs><radialGradient id="strat" cx=".5" cy=".15" r=".55"><stop offset="0" stop-color="#ffb347" stop-opacity=".9"/><stop offset=".55" stop-color="#ffb347" stop-opacity=".25"/><stop offset="1" stop-color="#5aa9ff" stop-opacity=".12"/></radialGradient></defs>
+    <g transform="translate(60,0)">
+      <text x="75" y="22" fill="#ffb347" font-size="15" font-weight="700" text-anchor="middle">MEP homogéneo</text>
+      <rect x="0" y="40" width="150" height="130" fill="#ffb34777" stroke="#9aa3c7" stroke-width="3"/>
+      <text x="75" y="35" fill="#e8ebf7" font-size="12" text-anchor="middle">⚡</text>
+      <text x="75" y="110" fill="#1a1300" font-size="13" text-anchor="middle" font-weight="700">FR = 1 en todo</text>
+      <text x="75" y="192" fill="#9aa3c7" font-size="12" text-anchor="middle">menos carga = cierro MARIPOSA</text>
+      <text x="75" y="210" fill="#9aa3c7" font-size="12" text-anchor="middle">(entra menos mezcla, FR igual)</text>
+    </g>
+    <g transform="translate(375,0)">
+      <text x="75" y="22" fill="#ffb347" font-size="15" font-weight="700" text-anchor="middle">MEP estratificado</text>
+      <rect x="0" y="40" width="150" height="130" fill="url(#strat)" stroke="#9aa3c7" stroke-width="3"/>
+      <text x="75" y="35" fill="#e8ebf7" font-size="12" text-anchor="middle">⚡</text>
+      <text x="75" y="72" fill="#1a1300" font-size="12" text-anchor="middle" font-weight="700">FR≈1 aquí</text>
+      <text x="75" y="140" fill="#9aa3c7" font-size="12" text-anchor="middle">pobre de media</text>
+      <text x="75" y="192" fill="#9aa3c7" font-size="12" text-anchor="middle">menos carga = MENOS combustible</text>
+      <text x="75" y="210" fill="#9aa3c7" font-size="12" text-anchor="middle">iny. directa al final de compresión</text>
+    </g>
+    <g transform="translate(690,0)">
+      <text x="75" y="22" fill="#5aa9ff" font-size="15" font-weight="700" text-anchor="middle">MEC</text>
+      <rect x="0" y="40" width="150" height="130" fill="#1d2a45" stroke="#9aa3c7" stroke-width="3"/>
+      <path d="M75 45 l-40 60 M75 45 l0 70 M75 45 l40 60" stroke="#ffb347" stroke-width="4"/>
+      <text x="75" y="150" fill="#9aa3c7" font-size="12" text-anchor="middle">siempre pobre de media</text>
+      <text x="75" y="192" fill="#9aa3c7" font-size="12" text-anchor="middle">menos carga = MENOS combustible</text>
+      <text x="75" y="210" fill="#9aa3c7" font-size="12" text-anchor="middle">(regulación cualitativa)</text>
+    </g>
+  </svg>
+  </div>
+  <div class="grid2">
+    <div class="card"><h4>Regulación de la carga (diap. 50)</h4>Ẇ<sub>e</sub> = η<sub>v</sub>·V<sub>T</sub>·ρ·(n/2)·F<sub>R</sub>F<sub>e</sub>·H<sub>c</sub>·η<sub>i</sub>η<sub>m</sub><br>Para bajar la carga a n fijo hay dos palancas:<br>• bajar <b>η<sub>v</sub></b> con la mariposa → <span class="pill p-o">cuantitativa</span> MEP homogéneo<br>• bajar <b>F<sub>R</sub></b> con menos combustible → <span class="pill p-b">cualitativa</span> MEC y MEP estratificado</div>
+    <div class="card"><h4>¿Por qué FR = 1 exacto?</h4>El <b>catalizador de 3 vías</b> solo limpia CO, HC y NO<sub>x</sub> a la vez en una ventana estrecha alrededor de FR = 1. Sin catalizador, 0,8 &lt; FR &lt; 1,15 (diap. 14).<br>La <b>sonda lambda</b> es el sensor que mantiene ese FR. Es el medio, no el motivo.</div>
+  </div>
+  <div class="miss"><b>Q3.</b> (en blanco) ¿En qué se parecen estratificado y homogéneo a baja carga? Razonada: <span class="ok">la forma de iniciar la combustión</span>, la chispa. El dosado global, la regulación y el momento de inyección son distintos.</div>
+  <div class="miss"><b>Q5.</b> Tú: <i>sonda lambda obligatoria</i>. Razonada: <span class="ok">correcto funcionamiento del catalizador de 3 vías</span>.</div>
+  <div class="quiz" data-c="c4"></div>
+</section>
+
+<!-- 5 -->
+<section id="c5">
+  <h2>5 · 4T vs 2T: válvulas, lumbreras y árbol de levas <small>T2 diap. 18–23</small></h2>
+  <div class="rule">Árbol de levas → válvulas → (casi siempre) 4T.<br><b>MEP 2T barrido por cárter</b>: todo por <b>lumbreras</b>, sin válvulas ni árbol de levas. Es simple, barato y ligero, y pierde aceite: el motor de la bomba de riego, el ciclomotor y la desbrozadora.<br><b>MEC 2T uniflujo</b> (gran motor marino lento): admisión por lumbreras, <b>válvula de escape</b> y compresor de barrido.</div>
+  <div class="svgbox">
+  <svg viewBox="0 0 900 270" width="100%">
+    <!-- 4T -->
+    <g transform="translate(40,0)">
+      <text x="90" y="20" fill="#e8ebf7" font-size="15" font-weight="700" text-anchor="middle">4T</text>
+      <circle cx="55" cy="40" r="10" fill="none" stroke="#b48cff" stroke-width="3"/><circle cx="125" cy="40" r="10" fill="none" stroke="#b48cff" stroke-width="3"/>
+      <text x="90" y="44" fill="#b48cff" font-size="11" text-anchor="middle">levas</text>
+      <path d="M55 52 v18 M125 52 v18" stroke="#9aa3c7" stroke-width="3"/><path d="M45 72 h20 M115 72 h20" stroke="#e8ebf7" stroke-width="4"/>
+      <text x="40" y="92" fill="#9aa3c7" font-size="10">adm.</text><text x="118" y="92" fill="#9aa3c7" font-size="10">esc.</text>
+      <rect x="30" y="75" width="120" height="140" fill="none" stroke="#9aa3c7" stroke-width="3"/>
+      <rect x="33" y="160" width="114" height="22" fill="#9aa3c7"/>
+      <text x="90" y="240" fill="#9aa3c7" font-size="12" text-anchor="middle">2 válvulas + árbol de levas</text>
+      <text x="90" y="257" fill="#9aa3c7" font-size="12" text-anchor="middle">1 ciclo cada 2 vueltas (i = ½)</text>
+    </g>
+    <!-- 2T carter -->
+    <g transform="translate(340,0)">
+      <text x="90" y="20" fill="#ffb347" font-size="15" font-weight="700" text-anchor="middle">MEP 2T · barrido por cárter</text>
+      <text x="90" y="52" fill="#e8ebf7" font-size="12" text-anchor="middle">⚡ bujía</text>
+      <rect x="30" y="60" width="120" height="120" fill="none" stroke="#9aa3c7" stroke-width="3"/>
+      <rect x="22" y="110" width="12" height="22" fill="#5aa9ff"/><text x="0" y="105" fill="#5aa9ff" font-size="10">transfer</text>
+      <rect x="146" y="100" width="12" height="26" fill="#ff6b6b"/><text x="160" y="96" fill="#ff6b6b" font-size="10">escape</text>
+      <rect x="33" y="135" width="114" height="22" fill="#9aa3c7"/>
+      <path d="M30 180 q-10 40 60 50 q70 -10 60 -50" fill="#ffb34722" stroke="#9aa3c7" stroke-width="3"/>
+      <text x="90" y="212" fill="#ffb347" font-size="11" text-anchor="middle">CÁRTER (pre-compresión)</text>
+      <rect x="146" y="185" width="14" height="14" fill="#4cd28a"/><text x="164" y="196" fill="#4cd28a" font-size="10">admisión</text>
+      <text x="90" y="245" fill="#4cd28a" font-size="12" text-anchor="middle">SOLO LUMBRERAS · sin válvulas</text>
+      <text x="90" y="262" fill="#4cd28a" font-size="12" text-anchor="middle">SIN árbol de levas ← Q4, Q10</text>
+    </g>
+    <!-- 2T uniflujo -->
+    <g transform="translate(650,0)">
+      <text x="90" y="20" fill="#5aa9ff" font-size="15" font-weight="700" text-anchor="middle">MEC 2T · uniflujo</text>
+      <path d="M90 38 v20" stroke="#9aa3c7" stroke-width="3"/><path d="M78 60 h24" stroke="#ff6b6b" stroke-width="5"/>
+      <text x="125" y="54" fill="#ff6b6b" font-size="10">VÁLVULA esc.</text>
+      <rect x="30" y="60" width="120" height="140" fill="none" stroke="#9aa3c7" stroke-width="3"/>
+      <rect x="22" y="160" width="12" height="20" fill="#5aa9ff"/><rect x="146" y="160" width="12" height="20" fill="#5aa9ff"/>
+      <text x="90" y="215" fill="#5aa9ff" font-size="11" text-anchor="middle">lumbreras de admisión abajo</text>
+      <path d="M90 190 v-110" stroke="#5aa9ff" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+      <text x="90" y="245" fill="#9aa3c7" font-size="12" text-anchor="middle">el aire barre de abajo arriba</text>
+      <text x="90" y="262" fill="#9aa3c7" font-size="12" text-anchor="middle">+ compresor de barrido · motores enormes</text>
+    </g>
+  </svg>
+  </div>
+  <div class="miss"><b>Q4.</b> ¿Qué motor no usa válvula de escape? Tú: <i>MEC 2T uniflujo</i>. Ese es justo el 2T que SÍ la necesita. Razonada: <span class="ok">MEP 2T de barrido por cárter</span>.</div>
+  <div class="miss"><b>Q10.</b> Motor pequeño y barato de una bomba de riego. Tú: <i>cigüeñal</i>. Todo MCIA tiene cigüeñal, porque biela-manivela es la base (diap. 4). Razonada: <span class="ok">árbol de levas</span>. Es un MEP 2T de lumbreras: lleva bujía, cigüeñal y mariposa.</div>
+  <div class="quiz" data-c="c5"></div>
+</section>
+
+<!-- 6 -->
+<section id="c6">
+  <h2>6 · Refrigeración por líquido vs aire <small>T2 diap. 25–26</small></h2>
+  <div class="rule">Líquido = enfría mejor → <b>más potencia específica</b>, mejor control, <b>MAYOR inercia térmica</b>, más complejo. El <b>termostato</b> (90–120 °C) decide si el líquido va al radiador o recircula.<br>Aire = más simple y robusto, menor inercia, más ruido, potencia específica limitada.</div>
+  <div class="svgbox">
+  <svg viewBox="0 0 900 230" width="100%">
+    <rect x="60" y="60" width="200" height="110" rx="10" fill="#2a2f4d" stroke="#9aa3c7"/><text x="160" y="105" fill="#e8ebf7" font-size="14" text-anchor="middle">BLOQUE</text><text x="160" y="125" fill="#9aa3c7" font-size="12" text-anchor="middle">camisas de agua</text>
+    <circle cx="160" cy="200" r="18" fill="#1d2a45" stroke="#5aa9ff"/><text x="160" y="205" fill="#5aa9ff" font-size="11" text-anchor="middle">bomba</text>
+    <path d="M260 90 h120" stroke="#ff6b6b" stroke-width="4" marker-end="url(#ar)"/><text x="320" y="82" fill="#ff6b6b" font-size="12" text-anchor="middle">sale caliente (sube)</text>
+    <rect x="380" y="70" width="90" height="40" rx="6" fill="#3a2a1a" stroke="#ffb347" stroke-width="2"/><text x="425" y="95" fill="#ffb347" font-size="13" text-anchor="middle" font-weight="700">TERMOSTATO</text>
+    <path d="M470 90 h120" stroke="#ff6b6b" stroke-width="4" marker-end="url(#ar)"/><text x="530" y="82" fill="#9aa3c7" font-size="11" text-anchor="middle">caliente → radiador</text>
+    <rect x="590" y="50" width="120" height="130" rx="6" fill="#1d2a45" stroke="#5aa9ff"/><text x="650" y="110" fill="#5aa9ff" font-size="14" text-anchor="middle">RADIADOR</text><text x="650" y="130" fill="#9aa3c7" font-size="11" text-anchor="middle">+ ventilador</text>
+    <path d="M650 180 v20 h-470" stroke="#5aa9ff" stroke-width="4" marker-end="url(#ar)"/>
+    <path d="M425 110 v60 h-150" stroke="#ffb347" stroke-width="3" stroke-dasharray="6 4" marker-end="url(#ar)"/><text x="350" y="160" fill="#ffb347" font-size="11" text-anchor="middle">frío → recirculación (bypass)</text>
+    <text x="780" y="80" fill="#9aa3c7" font-size="12">vaso de</text><text x="780" y="96" fill="#9aa3c7" font-size="12">expansión</text><text x="780" y="112" fill="#9aa3c7" font-size="12">+ válvula</text><text x="780" y="128" fill="#9aa3c7" font-size="12">p &gt; patm</text>
+    <text x="60" y="35" fill="#9aa3c7" font-size="12">El aceite está en el CÁRTER. El refrigerante NO sale de ahí.</text>
+  </svg>
+  </div>
+  <div class="miss"><b>Q17.</b> (en blanco) Razonada: <span class="ok">existe un termostato que abre o cierra el paso al radiador</span>.<br>a) Es falsa: con líquido la inercia es MAYOR. b) No la da la diapositiva. d) Es falsa: el cárter guarda el aceite.</div>
+  <div class="quiz" data-c="c6"></div>
+</section>
+
+<!-- 7 -->
+<section id="c7">
+  <h2>7 · Balance energético y pérdidas mecánicas <small>T2 diap. 48, 53, 61</small></h2>
+  <div class="rule">Rozar <b>no crea un tipo nuevo de energía</b>: se convierte en <b>calor</b> que va al <b>refrigerante y al aceite</b>.<br>Pérdidas mecánicas = rozamiento + bombeo (renovación de la carga) + auxiliares. Se cumple η<sub>e</sub> = η<sub>i</sub> · η<sub>m</sub>.</div>
+  <div class="svgbox">
+  <svg viewBox="0 0 900 260" width="100%">
+    <rect x="20" y="40" width="140" height="180" rx="8" fill="#3a2a1a"/><text x="90" y="125" fill="#ffb347" font-size="16" text-anchor="middle" font-weight="700">ṁf · Hc</text><text x="90" y="145" fill="#9aa3c7" font-size="11" text-anchor="middle">energía química</text>
+    <path d="M160 130 h50" stroke="#ffb347" stroke-width="6"/>
+    <rect x="210" y="70" width="150" height="120" rx="8" fill="#2a2f4d"/><text x="285" y="118" fill="#e8ebf7" font-size="14" text-anchor="middle">ciclo real</text><text x="285" y="138" fill="#9aa3c7" font-size="11" text-anchor="middle">η<tspan font-size="9" dy="3">i</tspan><tspan dy="-3"> ≈ 0,40–0,57</tspan></text>
+    <path d="M285 70 v-30 h80" stroke="#ff6b6b" stroke-width="4" fill="none"/><text x="370" y="35" fill="#ff6b6b" font-size="12">Q gases escape · Q refrigerante (paredes) · Q conv · Q comb. incompleta</text>
+    <path d="M360 130 h60" stroke="#4cd28a" stroke-width="5" marker-end="url(#ar)"/><text x="390" y="122" fill="#4cd28a" font-size="11" text-anchor="middle">Ẇi</text>
+    <rect x="420" y="80" width="170" height="100" rx="8" fill="#2a2f4d"/><text x="505" y="118" fill="#e8ebf7" font-size="14" text-anchor="middle">pérdidas mecánicas</text><text x="505" y="138" fill="#9aa3c7" font-size="11" text-anchor="middle">η<tspan font-size="9" dy="3">m</tspan><tspan dy="-3"> = Ẇe/Ẇi</tspan></text>
+    <path d="M505 180 v30" stroke="#ff6b6b" stroke-width="4"/>
+    <rect x="390" y="210" width="230" height="40" rx="6" fill="#3a1d1d" stroke="#ff6b6b"/><text x="505" y="228" fill="#ff6b6b" font-size="12" text-anchor="middle">rozamiento (Qroz) · bombeo · auxiliares</text><text x="505" y="243" fill="#ffb347" font-size="12" text-anchor="middle" font-weight="700">Qroz → calor al refrigerante + al aceite</text>
+    <path d="M590 130 h80" stroke="#4cd28a" stroke-width="6" marker-end="url(#ar)"/>
+    <rect x="670" y="90" width="200" height="80" rx="8" fill="#1f3a2e"/><text x="770" y="125" fill="#4cd28a" font-size="16" text-anchor="middle" font-weight="700">Ẇe en el eje</text><text x="770" y="148" fill="#9aa3c7" font-size="12" text-anchor="middle">η<tspan font-size="9" dy="3">e</tspan><tspan dy="-3"> ≈ 0,30–0,52</tspan></text>
+  </svg>
+  </div>
+  <div class="miss"><b>Q14.</b> (en blanco) Razonada: <span class="ok">en calor cedido al lubricante y al refrigerante</span> (diap. 53, literal).<br>"Pérdidas de bombeo" es otro TIPO de pérdida mecánica, no el destino de la energía del rozamiento.</div>
+  <div class="quiz" data-c="c7"></div>
+</section>
+
+<!-- 8 -->
+<section id="c8">
+  <h2>8 · Relación de compresión y rendimiento del ciclo teórico <small>T2 diap. 45, 57</small></h2>
+  <div class="rule">r = (V<sub>D</sub> + V<sub>C</sub>) / V<sub>C</sub>. Si V<sub>D</sub> sube y V<sub>C</sub> no cambia, r sube. Y η<sub>Otto</sub> = 1 − 1/r<sup>γ−1</sup> sube con r.</div>
+  <div class="grid2">
+    <div class="card">
+      <h4>Mueve la cilindrada (V<sub>C</sub> fijo = 50 cm³)</h4>
+      <input type="range" id="vd" min="200" max="900" value="450" step="10">
+      <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+        <svg id="cyl" viewBox="0 0 140 230" width="120"></svg>
+        <div style="font-size:15px">V<sub>D</sub> = <b id="vdv"></b> cm³<br>r = <b id="rv"></b><br>η<sub>Otto</sub> (γ = 1,4) = <b id="ev" style="color:var(--green)"></b><br><span class="src">MEP r 9–11 · MEC r 15–18</span></div>
+      </div>
+    </div>
+    <div class="card"><h4>η vs r</h4><svg id="curve" viewBox="0 0 360 230" width="100%"></svg></div>
+  </div>
+  <div class="miss"><b>Q6.</b> V/F, vale −1 si fallas. Tú: <i>Falso</i>. Razonada: <span class="ok">Verdadero</span>. Más V<sub>D</sub> con el mismo V<sub>C</sub> da más r, y más r da más η.</div>
+  <div class="quiz" data-c="c8"></div>
+</section>
+
+<!-- 9 -->
+<section id="c9">
+  <h2>9 · Órdenes de magnitud y "quién vale para qué" <small>T1 diap. 21–27, 40 · T2 diap. 7</small></h2>
+  <div class="rule">Coche: <b>decenas a cientos de kW</b> (40–700 kW; el F40 de los problemas da 352 kW). MCIA: de 100 W a 80 MW. TG: hasta 600 MW. Ciclo combinado: hasta 1200 MW.</div>
+  <div class="svgbox"><svg id="logbar" viewBox="0 0 900 260" width="100%"></svg></div>
+  <table>
+    <tr><th></th><th>MCIA</th><th>Turbina de gas</th><th>Turbina de vapor</th><th>Ciclo combinado</th></tr>
+    <tr><td class="k">η</td><td>0,20–0,52</td><td>0,25–0,40</td><td>0,35–0,45</td><td>0,48–0,63</td></tr>
+    <tr><td class="k">Factor a media carga</td><td><b>1,0</b> (casi no pierde)</td><td><b style="color:var(--red)">0,80–0,85</b> (pierde mucho)</td><td>0,91–0,96</td><td>0,84–0,88</td></tr>
+    <tr><td class="k">Combustible</td><td>alta–media</td><td><b>alta</b> calidad</td><td>media–baja (cualquiera)</td><td>alta–media</td></tr>
+    <tr><td class="k">Arranque</td><td>muy rápido</td><td>muy rápido</td><td>lento</td><td>relativ. lento</td></tr>
+  </table>
+  <p class="src">Lo acertaste (Q7, Q8, Q18): la TG no se usa en coches porque pierde rendimiento con carga variable. A plena carga, la potencia máxima está al régimen más alto. Una TG emite NO<sub>x</sub> porque quema a T alta con exceso de O<sub>2</sub>.</p>
+  <div class="miss"><b>Q12.</b> Tú: <i>4–70 kW</i>. Razonada: <span class="ok">40–700 kW</span>. 70 kW son unos 95 CV: se queda corto para muchos coches.</div>
+  <div class="quiz" data-c="c9"></div>
+</section>
+
+<!-- 10 -->
+<section id="c10">
+  <h2>10 · Chuleta final: 12 frases para el martes</h2>
+  <ol>
+    <li>Máquina térmica = <b>usa</b> estado térmico. Motor térmico = lo <b>crea</b>.</li>
+    <li>Compresor = generadora. Turbina o expansor = motora. Scroll, tornillo, paletas, roots y pistón = volumétricas.</li>
+    <li>Externa: cerrado posible, cualquier combustible, η sobre Q<sub>h</sub>. Interna: abierto obligatorio, combustible de calidad, η sobre ṁ<sub>f</sub>H<sub>c</sub>.</li>
+    <li>Máquina de vapor = motor de combustión externa volumétrico (η ≤ 5 %).</li>
+    <li>MEP = chispa + mezcla previa + combustible ligero → picado. MEC = autoinflamación + solo aire + combustible pesado → partículas.</li>
+    <li>Homogéneo y estratificado solo comparten la chispa.</li>
+    <li>FR = 1 en MEP por el catalizador de 3 vías. La sonda lambda es el sensor.</li>
+    <li>Mariposa = regulación cuantitativa (MEP homogéneo). Menos combustible = cualitativa (MEC, estratificado).</li>
+    <li>MEP 2T de cárter: lumbreras, sin válvulas ni levas. MEC 2T uniflujo: válvula de escape.</li>
+    <li>Líquido: termostato, más inercia, más potencia específica. Aire: simple, ruidoso, menos inercia.</li>
+    <li>Rozamiento → calor al refrigerante y al aceite. η<sub>e</sub> = η<sub>i</sub>·η<sub>m</sub>.</li>
+    <li>Más V<sub>D</sub> con V<sub>C</sub> fijo → más r → más η. Coche: 40–700 kW.</li>
+  </ol>
+  <p>Cuando acabes, pulsa <b>⧉ Exportar respuestas</b> (arriba) y pégamelo en el chat.</p>
+</section>
+</main>
+</div>
+
+<script>
+// ---------- questions ----------
+// orig: true = re-test of a question you missed in PEC1 Teoría 2025. Keys are reasoned from the T1/T2 slides, not official.
+const Q = [
+ {c:"c1",id:"Q2",orig:true,t:"Si se desea aprovechar un alto nivel de energía térmica de una corriente de fluido compresible, se requerirá de:",o:["Ninguna de las respuestas anteriores son correctas.","Una máquina térmica motora, ya sea volumétrica o turbomáquina.","Un motor térmico, ya sea de combustión interna o de combustión externa.","Una máquina térmica generadora, como un turbocompresor accionado por un motor eléctrico."],a:1,w:"La corriente ya tiene energía térmica, así que basta con expandirla: máquina motora. El motor térmico es el que crea el estado térmico."},
+ {c:"c1",id:"Q9",orig:true,t:"¿Cuál de las siguientes descripciones se aplicaría al compresor scroll de una bomba de calor para aire acondicionado?",o:["Una máquina térmica motora, turbomáquina.","Una máquina térmica generadora, volumétrica, rotativa.","Ninguna de las otras respuestas es correcta.","Un motor térmico que utiliza fluido condensable, rotativo."],a:1,w:"Compresor = generadora. Scroll = volumétrica rotativa con compresión interna (T1 diap. 11)."},
+ {c:"c1",id:"N1",t:"El compresor de un turbo de automóvil (accionado por la turbina de escape) es:",o:["Máquina térmica generadora, turbomáquina","Máquina térmica motora, turbomáquina","Máquina térmica generadora, volumétrica","Motor térmico de combustión interna"],a:0,w:"Comprime el aire (metes trabajo) con un rodete centrífugo: generadora + turbomáquina. La turbina del otro lado es motora."},
+ {c:"c1",id:"N2",t:"Frente a una turbomáquina, una máquina volumétrica es:",o:["De flujo continuo y adecuada para grandes caudales","De flujo discontinuo, baja velocidad, pequeños caudales y no adiabática","Siempre alternativa (de pistón)","Adiabática y de alta fricción fluida"],a:1,w:"T1 diap. 10. Hay volumétricas rotativas (scroll, tornillo, paletas, roots), así que la c) es falsa."},
+
+ {c:"c2",id:"Q1",orig:true,t:"¿Cuál de las siguientes afirmaciones es verdadera?",o:["Los rendimientos térmicos de los motores de combustión interna solamente tienen en cuenta el calor aportado al fluido motor.","El rendimiento interno de una máquina térmica toma como referencia la energía química del combustible.","Ninguna de las otras respuestas es correcta.","La definición del rendimiento térmico de un motor varía en función de las máquinas que lo contienen."],a:2,w:"MCI: η = Ẇe/(ṁf·Hc), referida a la energía química. Una máquina no usa la energía química. La definición depende de interna/externa (T1 diap. 17)."},
+ {c:"c2",id:"Q15",orig:true,t:"La máquina de vapor es:",o:["Una máquina térmica motora turbomáquina.","Un motor de combustión interna de aspiración natural.","Un motor térmico de combustión externa."],a:2,w:"T1 diap. 36: primer motor térmico, combustión externa, cualquier combustible, η ≤ 5 %. Es de pistón (volumétrica)."},
+ {c:"c2",id:"N3",t:"¿Cuál de estos motores tiene que ser, obligatoriamente, de ciclo abierto?",o:["Turbina de vapor","Motor Stirling","Turbina de gas","ORC"],a:2,w:"Es de combustión interna: el fluido cambia químicamente y no puede reutilizarse. Los otros tres son de combustión externa."},
+ {c:"c2",id:"N4",t:"Un aerorreactor sin compresor (estatorreactor):",o:["Puede funcionar en el vacío","No puede arrancar a velocidad nula","Da potencia en un eje","Lleva su propio comburente"],a:1,w:"T1 diap. 19 y 34: necesita velocidad para la compresión dinámica. El cohete es el que lleva comburente y funciona en el vacío."},
+
+ {c:"c3",id:"Q13",orig:true,t:"Los motores de encendido por compresión:",o:["Pueden sufrir el fenómeno de picado.","Utilizan combustibles ligeros volátiles, como el etanol.","Tienen una mezcla aire-combustible homogénea en la cámara de combustión.","Emiten muchas más partículas que los MEP."],a:3,w:"Picado y combustibles ligeros = MEP. El MEC tiene un dosado local muy heterogéneo: zonas ricas y calientes forman hollín (T2 diap. 16, T1 diap. 52)."},
+ {c:"c3",id:"Q16",orig:true,t:"¿En qué motor utilizarías un combustible sintético (e-fuel) pesado con alta tendencia a la autoinflamación?",o:["MEC","MEP"],a:0,w:"El MEC necesita combustibles pesados con baja T de autoinflamación. En un MEP causaría picado."},
+ {c:"c3",id:"N5",t:"Un combustible con número de octano alto es bueno para el MEP porque:",o:["Se autoinflama con facilidad","Resiste la autoinflamación: menos riesgo de picado","Aumenta las partículas","Permite regular con la mariposa"],a:1,w:"T2 diap. 15: más octano → más T de autoinflamación y más tiempo de retraso → menos picado."},
+ {c:"c3",id:"N6",t:"Las tres fases de la combustión en un MEC son:",o:["Chispa, frente de llama, extinción","Tiempo de retraso, combustión premezclada, combustión por difusión","Admisión, compresión, expansión","Deflagración, detonación, picado"],a:1,w:"T2 diap. 17."},
+
+ {c:"c4",id:"Q3",orig:true,t:"¿En qué se asemejan los MEP de mezcla estratificada y de mezcla homogénea cuando funcionan a bajo grado de carga?",o:["La forma de iniciar la combustión.","El dosado global de la cámara de combustión.","El método de regular la carga.","El momento de entrada del combustible al cilindro."],a:0,w:"Los dos son MEP y encienden con chispa. El estratificado es pobre de media y regula de forma cualitativa con inyección tardía. El homogéneo tiene FR ≈ 1 y usa mariposa."},
+ {c:"c4",id:"Q5",orig:true,t:"¿Por qué se usa actualmente mezcla estequiométrica cuasi-exacta en los MEP?",o:["Por la obligatoriedad de la sonda lambda en el escape.","Por el correcto funcionamiento del catalizador de tres vías.","Por necesidades del sistema de inyección electrónica."],a:1,w:"T2 diap. 14: con catalizador de 3 vías FR = 1; sin él, 0,8 < FR < 1,15. La sonda lambda es el medio de control."},
+ {c:"c4",id:"N7",t:"Un MEP de mezcla homogénea reduce la carga a régimen constante:",o:["Cerrando la mariposa (baja η_v, FR constante)","Inyectando menos combustible con el mismo aire","Retrasando la inyección al final de la compresión","Aumentando la relación de compresión"],a:0,w:"Regulación cuantitativa (T2 diap. 50). La b) es la cualitativa del MEC y del estratificado."},
+
+ {c:"c5",id:"Q4",orig:true,t:"¿Cuál de los siguientes motores no utiliza válvula de escape?",o:["MEC de dos tiempos de barrido uniflujo.","MEP de dos tiempos de barrido por cárter.","MEP de cuatro tiempos."],a:1,w:"El MEP 2T de cárter hace todo por lumbreras. El MEC 2T uniflujo necesita válvula de escape (T2 diap. 21–22)."},
+ {c:"c5",id:"Q10",orig:true,t:"¿Cuál de los siguientes elementos constructivos no te lo encontrarías en un pequeño motor sencillo y de bajo coste que acciona una bomba de riego?",o:["Bujía.","Cigüeñal.","Árbol de levas.","Válvula de mariposa."],a:2,w:"Es un MEP 2T con lumbreras: no tiene válvulas, así que no tiene árbol de levas. Todo MCIA tiene cigüeñal."},
+ {c:"c5",id:"N8",t:"Un gran motor marino lento de 2 tiempos suele ser:",o:["MEP 2T de barrido por cárter, sin válvulas","MEC 2T uniflujo: admisión por lumbreras, válvula de escape y compresor de barrido","MEC 4T con mariposa","Wankel"],a:1,w:"T2 diap. 22."},
+
+ {c:"c6",id:"Q17",orig:true,t:"En los MCIA refrigerados por líquido:",o:["La inercia térmica es menor que en los MCIA refrigerados por aire.","El radiador es eficaz en aplicaciones no estacionarias.","Existe un termostato encargado de abrir o cerrar el paso del líquido refrigerante al radiador.","El líquido refrigerante es bombeado desde el cárter hasta las cavidades del bloque motor alrededor de las camisas."],a:2,w:"T2 diap. 25: termostato a 90–120 °C. Con líquido la inercia es mayor. El cárter guarda el aceite."},
+ {c:"c6",id:"N9",t:"Frente a la refrigeración por aire, la refrigeración por líquido:",o:["Es más sencilla y robusta","Permite más potencia específica y tiene mayor inercia térmica","Tiene menor inercia térmica y más ruido","No necesita bomba"],a:1,w:"T2 diap. 25–26."},
+
+ {c:"c7",id:"Q14",orig:true,t:"¿En qué se transforman principalmente las pérdidas mecánicas por rozamiento de un MCIA?",o:["En pérdidas de bombeo.","En potencia indicada.","En calor cedido al lubricante y al refrigerante.","En pérdidas por combustión incompleta."],a:2,w:"T2 diap. 53: «La energía perdida por rozamiento (Qroz) se reparte en calor al refrigerante y calor al aceite»."},
+ {c:"c7",id:"N10",t:"Si η_i = 0,45 y η_m = 0,85, el rendimiento efectivo es:",o:["0,53","0,38","0,40","1,30"],a:1,w:"η_e = η_i·η_m = 0,45·0,85 ≈ 0,38."},
+
+ {c:"c8",id:"Q6",orig:true,t:"Una mayor cilindrada unitaria manteniendo el mismo volumen final de compresión implica un mayor rendimiento del ciclo teórico de un motor de combustión interna alternativo.",o:["Falso","Verdadero"],a:1,w:"r = (V_D+V_C)/V_C sube con V_D. η = 1 − 1/r^(γ−1) sube con r."},
+ {c:"c8",id:"N11",t:"Ciclo Otto con γ = 1,4: si r pasa de 9 a 11, η pasa aproximadamente de:",o:["0,585 a 0,617","0,45 a 0,50","0,60 a 0,60 (no cambia)","0,70 a 0,80"],a:0,w:"1 − 9^−0,4 = 0,585; 1 − 11^−0,4 = 0,617."},
+
+ {c:"c9",id:"Q12",orig:true,t:"¿Cuál de los siguientes rangos de potencia máxima son habituales en MCIA para vehículos de automoción de cuatro ruedas?",o:["40-700 kW.","400 kW-7 MW.","4-70 kW.","4-700 W"],a:0,w:"Los turismos van de decenas a cientos de kW. 70 kW ≈ 95 CV se queda corto."},
+ {c:"c9",id:"N12",t:"¿Qué motor pierde MENOS rendimiento al trabajar a media carga?",o:["MCIA (factor 1,0)","Turbina de gas (0,80–0,85)","Ciclo combinado (0,84–0,88)"],a:0,w:"T1 diap. 40. Por eso la TG no se usa en automoción."}
+];
+
+// ---------- quiz engine ----------
+const KEY="mymt-pei1-repaso-v1";
+let st=JSON.parse(localStorage.getItem(KEY)||"{}");
+const pen=q=>1/(q.o.length-1);
+function render(){
+  document.querySelectorAll(".quiz").forEach(box=>{
+    const c=box.dataset.c; box.innerHTML="<h3>Practica este concepto</h3>";
+    Q.filter(q=>q.c===c).forEach(q=>{
+      const d=document.createElement("div"); d.className="q"; d.id="q-"+q.id;
+      d.innerHTML=`<div class="qh"><span>${q.orig?"Re-test de tu fallo "+q.id:"Pregunta nueva "+q.id}</span><span>fallo resta −1/${q.o.length-1}</span></div><div class="qt">${q.t}</div>`;
+      q.o.forEach((o,i)=>{const b=document.createElement("button");b.className="opt";b.textContent=String.fromCharCode(97+i)+") "+o;b.onclick=()=>answer(q,i);d.appendChild(b);});
+      const sk=document.createElement("button");sk.className="skip";sk.textContent="Dejar en blanco (0)";sk.onclick=()=>answer(q,-1);d.appendChild(sk);
+      const w=document.createElement("div");w.className="why";w.innerHTML="<b>Por qué:</b> "+q.w+(q.orig?' <span class="src">(clave razonada, no oficial)</span>':"");d.appendChild(w);
+      box.appendChild(d); paint(q);
+    });
+  });
+  score();
+}
+function answer(q,i){ if(st[q.id]!==undefined) return; st[q.id]=i; localStorage.setItem(KEY,JSON.stringify(st)); paint(q); score(); }
+function paint(q){
+  const d=document.getElementById("q-"+q.id); const v=st[q.id]; if(v===undefined) return;
+  d.classList.add("answered");
+  d.querySelectorAll("button.opt").forEach((b,i)=>{b.disabled=true; if(i===q.a)b.classList.add("right"); if(i===v&&v!==q.a)b.classList.add("wrong");});
+  d.querySelector(".skip").style.display="none";
+}
+function score(){
+  let ans=0,ok=0,ko=0,net=0;
+  Q.forEach(q=>{const v=st[q.id]; if(v===undefined)return; ans++; if(v===-1)return; if(v===q.a){ok++;net+=1}else{ko++;net-=pen(q)}});
+  sAns.textContent=ans; sTot.textContent=Q.length; sOk.textContent=ok; sKo.textContent=ko; sNet.textContent=net.toFixed(2).replace(".",",")+" / "+Q.length;
+  document.querySelectorAll("nav a[data-c]").forEach(a=>{const qs=Q.filter(q=>q.c===a.dataset.c); if(qs.every(q=>st[q.id]!==undefined)) a.classList.add("done"); else a.classList.remove("done");});
+}
+function exportAnswers(){
+  const names={c1:"Máquinas térmicas",c2:"Motores térmicos",c3:"MEP vs MEC",c4:"Mezcla y regulación",c5:"2T vs 4T",c6:"Refrigeración",c7:"Balance energético",c8:"r y rendimiento",c9:"Órdenes de magnitud"};
+  let ok=0,ko=0,bl=0,net=0,lines=[];
+  lines.push("MyMT PEI1 · Repaso de fallos (v1) · export "+new Date().toLocaleString("es-ES"));
+  Q.forEach(q=>{
+    const v=st[q.id]; let res;
+    if(v===undefined) res="SIN RESPONDER"; else if(v===-1){res="EN BLANCO (0)";bl++} else if(v===q.a){res="BIEN (+1)";ok++;net+=1} else {res="MAL (−1/"+(q.o.length-1)+")";ko++;net-=pen(q)}
+    lines.push("");
+    lines.push(`[${names[q.c]}] ${q.id}${q.orig?" (re-test PEC1 2025)":" (nueva)"} · ${res}`);
+    lines.push(q.t);
+    q.o.forEach((o,i)=>lines.push(`  ${String.fromCharCode(97+i)}) ${o}${i===q.a?"   ← clave":""}${i===v?"   ← TU RESPUESTA":""}`));
+  });
+  lines.splice(1,0,`Bien ${ok} · Mal ${ko} · Blanco ${bl} · Sin responder ${Q.length-ok-ko-bl} · Neta ${net.toFixed(2)} / ${Q.length}`);
+  const txt=lines.join("\n"); const box=document.getElementById("exportBox");
+  box.style.display="block"; box.value=txt; box.select();
+  const done=()=>{const b=document.querySelector(".bar .btn");b.textContent="✓ Copiado: pégalo en el chat";setTimeout(()=>b.textContent="⧉ Exportar respuestas",3000)};
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(done,()=>{document.execCommand("copy");done()})}else{try{document.execCommand("copy");done()}catch(e){}}
+}
+function resetAll(){ if(confirm("¿Borrar todas tus respuestas?")){st={};localStorage.removeItem(KEY);render();document.getElementById("exportBox").style.display="none";} }
+
+// ---------- r / eta interactive ----------
+const VC=50,G=1.4;
+function drawR(){
+  const vd=+document.getElementById("vd").value, r=(vd+VC)/VC, e=1-Math.pow(r,1-G);
+  vdv.textContent=vd; rv.textContent=r.toFixed(1); ev.textContent=e.toFixed(3);
+  const H=180, hc=H*VC/(900+VC), hd=H*vd/(900+VC);
+  document.getElementById("cyl").innerHTML=`<rect x="20" y="20" width="100" height="${hc+hd+10}" fill="none" stroke="#9aa3c7" stroke-width="3"/>
+   <rect x="22" y="22" width="96" height="${hc}" fill="#ffb34788"/><text x="70" y="${22+hc/2+4}" fill="#1a1300" font-size="11" text-anchor="middle">V_C</text>
+   <rect x="22" y="${22+hc}" width="96" height="${hd}" fill="#5aa9ff33"/><text x="70" y="${22+hc+hd/2+4}" fill="#5aa9ff" font-size="11" text-anchor="middle">V_D</text>
+   <rect x="22" y="${22+hc+hd}" width="96" height="14" fill="#9aa3c7"/>`;
+  const X=r=>40+(r-1)*300/24, Y=e=>200-e*260;
+  let p="";for(let x=1.5;x<=25;x+=0.25)p+=(p?"L":"M")+X(x).toFixed(1)+","+Y(1-Math.pow(x,1-G)).toFixed(1);
+  document.getElementById("curve").innerHTML=`<path d="M40 200 H350 M40 200 V10" stroke="#2c3358"/>
+   <rect x="${X(9)}" y="10" width="${X(11)-X(9)}" height="190" fill="#ffb34722"/><text x="${X(10)}" y="22" fill="#ffb347" font-size="10" text-anchor="middle">MEP</text>
+   <rect x="${X(15)}" y="10" width="${X(18)-X(15)}" height="190" fill="#5aa9ff22"/><text x="${X(16.5)}" y="22" fill="#5aa9ff" font-size="10" text-anchor="middle">MEC</text>
+   <path d="${p}" stroke="#4cd28a" stroke-width="2.5" fill="none"/>
+   <circle cx="${X(r)}" cy="${Y(e)}" r="6" fill="#ff6b6b"/>
+   <text x="200" y="222" fill="#9aa3c7" font-size="11" text-anchor="middle">r</text><text x="14" y="110" fill="#9aa3c7" font-size="11">η</text>
+   ${[5,10,15,20,25].map(t=>`<text x="${X(t)}" y="212" fill="#9aa3c7" font-size="10" text-anchor="middle">${t}</text>`).join("")}
+   ${[0.2,0.4,0.6].map(t=>`<text x="34" y="${Y(t)+3}" fill="#9aa3c7" font-size="10" text-anchor="end">${t}</text>`).join("")}`;
+}
+document.getElementById("vd").addEventListener("input",drawR);
+
+// ---------- log power bar ----------
+(function(){
+  const L=v=>120+(Math.log10(v)-2)*(760/8); // 100 W .. 10 GW
+  const rows=[["MCIA (todos)",100,80e6,"#ffb347"],["Coches (Q12)",40e3,700e3,"#ff6b6b"],["Turbina de gas",100e3,600e6,"#b48cff"],["Turbina de vapor",1e6,1600e6,"#5aa9ff"],["Ciclo combinado",40e6,1200e6,"#4cd28a"]];
+  let s="";["100 W","1 kW","10 kW","100 kW","1 MW","10 MW","100 MW","1 GW","10 GW"].forEach((t,i)=>{const x=120+i*95;s+=`<line x1="${x}" y1="20" x2="${x}" y2="225" stroke="#2c3358"/><text x="${x}" y="245" fill="#9aa3c7" font-size="11" text-anchor="middle">${t}</text>`});
+  rows.forEach((r,i)=>{const y=35+i*38;s+=`<text x="110" y="${y+15}" fill="#e8ebf7" font-size="12" text-anchor="end">${r[0]}</text><rect x="${L(r[1])}" y="${y}" width="${L(r[2])-L(r[1])}" height="22" rx="5" fill="${r[3]}" opacity=".8"/>`});
+  s+=`<rect x="${L(4e3)}" y="${35+38}" width="${L(70e3)-L(4e3)}" height="22" rx="5" fill="none" stroke="#9aa3c7" stroke-dasharray="4 3"/><text x="${L(4e3)}" y="${35+38-4}" fill="#9aa3c7" font-size="10">tu respuesta 4–70 kW</text>`;
+  document.getElementById("logbar").innerHTML=s;
+})();
+
+render(); drawR();
+</script>
+</body>
+</html>

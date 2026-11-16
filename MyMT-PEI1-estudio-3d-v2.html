@@ -1,0 +1,1054 @@
+<title>MyMT PEI1 en 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column (max 980px). Each concept = a "banco de pruebas": a visual on top, controls under it, slide source at the end. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --surface-2:#e8ecf0; --fg:#1b232c; --muted:#56616d; --line:#cdd5dd;
+  --accent:#1f5fa8; --accent-fg:#ffffff; --accent-soft:#dbe7f5;
+  --adm:#2a66c9; --comp:#23905a; --exp:#cf3f2a; --esc:#b88a00; --own:#7a4fb0;
+  --ok:#1d7d46; --bad:#b3261e;
+  --stage:#dfe5eb;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",Roboto,Arial,sans-serif;
+  --f-mono:"JetBrains Mono",Consolas,"Courier New",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12171d; --surface:#1a2129; --surface-2:#232c36; --fg:#e4e9ee; --muted:#9aa6b2; --line:#33404d;
+  --accent:#6ea8ec; --accent-fg:#0d1620; --accent-soft:#1f3248;
+  --adm:#6d9cf0; --comp:#4cc184; --exp:#f0735f; --esc:#e3be3c; --own:#b892e6;
+  --ok:#5fcf8c; --bad:#ff8a80; --stage:#0e1318; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12171d; --surface:#1a2129; --surface-2:#232c36; --fg:#e4e9ee; --muted:#9aa6b2; --line:#33404d;
+  --accent:#6ea8ec; --accent-fg:#0d1620; --accent-soft:#1f3248;
+  --adm:#6d9cf0; --comp:#4cc184; --exp:#f0735f; --esc:#e3be3c; --own:#b892e6;
+  --ok:#5fcf8c; --bad:#ff8a80; --stage:#0e1318; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--f-body);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+header.top .in{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px;display:flex;gap:12px;align-items:center;overflow-x:auto;scrollbar-width:none}
+header.top a{font:600 15px/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-decoration:none;white-space:nowrap;padding:10px 4px;min-height:44px;display:flex;align-items:center}
+header.top a:hover,header.top a:focus-visible{color:var(--accent)}
+header.top .brand{color:var(--fg);font-size:18px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0}
+h1{font-size:clamp(34px,6vw,52px);font-weight:700;letter-spacing:.01em}
+h2{font-size:30px;font-weight:700;margin-top:48px;padding-top:12px;border-top:3px solid var(--fg)}
+h3{font-size:22px;font-weight:600}
+p{margin:0}
+.lead{color:var(--muted);max-width:65ch}
+.hero{display:grid;gap:12px;padding-block:24px 8px}
+.eyebrow{font:600 13px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 13px/1 var(--f-mono);padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--muted)}
+.bench{display:grid;gap:12px;margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px}
+.bench > *{min-width:0}
+.stage{position:relative;background:var(--stage);border-radius:6px;overflow:hidden;touch-action:none}
+.stage canvas{display:block;width:100%;height:100%}
+.stage.three{height:min(62vh,460px);min-height:300px}
+.stage .hint{position:absolute;left:8px;bottom:8px;font:12px/1.2 var(--f-mono);color:var(--muted);background:var(--surface);padding:4px 6px;border-radius:4px;opacity:.9;pointer-events:none}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cols{display:grid;gap:16px;grid-template-columns:1fr}
+@media (min-width:760px){.cols.two{grid-template-columns:1.25fr 1fr}.cols.even{grid-template-columns:1fr 1fr}}
+.cols > *{min-width:0}
+button,.btn{font:600 15px/1 var(--f-body);min-height:44px;padding:0 14px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+label.ctl{display:grid;gap:4px;font-size:14px;color:var(--muted);min-width:0;flex:1 1 180px}
+label.ctl b{color:var(--fg);font-family:var(--f-mono);font-weight:600}
+input[type=range]{width:100%;min-height:32px;accent-color:var(--accent)}
+select{font:15px var(--f-body);min-height:44px;padding:0 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.src{font:12px/1.4 var(--f-mono);color:var(--muted)}
+.own{border-left:3px solid var(--own);padding:4px 0 4px 10px;color:var(--fg)}
+.own::before{content:"Explicación propia · ";font:600 12px var(--f-mono);color:var(--own);letter-spacing:.03em}
+.parts{display:grid;gap:12px}
+.pgroup{display:grid;gap:6px}
+.pgroup h4{margin:0;font:600 13px/1.2 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pgroup .row button{font-size:14px;min-height:40px;padding:0 10px}
+.info{background:var(--surface-2);border-radius:6px;padding:12px;display:grid;gap:6px;min-height:120px;align-content:start}
+.info .name{font:700 20px/1.1 var(--f-display)}
+.info .grp{font:600 12px var(--f-mono);color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.readout div{background:var(--surface-2);border-radius:6px;padding:8px 10px;display:grid;gap:2px}
+.readout span{font:12px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.readout b{font:600 18px/1.2 var(--f-mono);font-variant-numeric:tabular-nums}
+.stroke-name{font:700 28px/1 var(--f-display);letter-spacing:.02em}
+svg text{font-family:var(--f-mono)}
+.svgbox{background:var(--stage);border-radius:6px;overflow:hidden}
+.svgbox svg{display:block;width:100%;height:auto}
+.formula{font:600 15px/1.5 var(--f-mono);background:var(--surface-2);border-radius:6px;padding:8px 12px;overflow-x:auto;white-space:nowrap}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 13px var(--f-mono);text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tree{display:grid;gap:8px}
+.tree .node{border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--surface-2);display:grid;gap:4px}
+.tree .node b{font:700 17px/1.2 var(--f-display);letter-spacing:.02em}
+.tree .kids{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-left:12px;padding-left:12px;border-left:2px solid var(--line)}
+.tree small{color:var(--muted)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:14px}
+.quiz{display:grid;gap:16px}
+.q{display:grid;gap:8px;border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--surface)}
+.q .opts{display:grid;gap:6px}
+.q .opts button{text-align:left;font-weight:400;line-height:1.3;padding:10px 12px;height:auto}
+.q .opts button.right{background:color-mix(in srgb,var(--ok) 18%,var(--surface));border-color:var(--ok)}
+.q .opts button.wrong{background:color-mix(in srgb,var(--bad) 15%,var(--surface));border-color:var(--bad)}
+.q .opts button.right::after{content:"  ✓ Correcta";font-weight:700;color:var(--ok)}
+.q .opts button.wrong::after{content:"  ✗ No";font-weight:700;color:var(--bad)}
+.q .why{font-size:15px}
+.score{font:600 16px var(--f-mono)}
+a{color:var(--accent)}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<header class="top"><div class="in">
+  <a class="brand" href="#inicio">MyMT · PEI1</a>
+  <a href="#despiece">Despiece 3D</a>
+  <a href="#ciclo4t">Ciclo 4T</a>
+  <a href="#biela">Biela-manivela</a>
+  <a href="#ciclos">Ciclos teóricos</a>
+  <a href="#balance">Balance</a>
+  <a href="#t1">Tema 1</a>
+  <a href="#test">Test</a>
+</div></header>
+
+<main class="wrap">
+<section class="hero" id="inicio">
+  <div class="eyebrow">Máquinas y Motores Térmicos · PEI1 · mar 17 nov 2026 · 08:30</div>
+  <h1>El motor por dentro: T1 y T2 en 3D</h1>
+  <p class="lead">Gira el motor con el dedo o el ratón. Separa sus piezas. Mira el ciclo de 4 tiempos y el diagrama p-V a la vez. Cada bloque dice de qué diapositiva sale. La teoría completa, las fórmulas y los 16 problemas siguen en la <a href="https://claude.ai/artifact/HES6gWSFMXKKzYFPs5vDG1" target="_blank" rel="noopener">página v1 de estudio</a>.</p>
+  <div class="facts">
+    <span class="chip">Teoría 2/3 · Problemas 1/3 (solo T2)</span>
+    <span class="chip">Fuente: diapositivas T1 (53) y T2 (62)</span>
+    <span class="chip">Test: Wuolah filas 1, 3 y 4</span>
+  </div>
+  <p class="src">Los textos con la marca morada «Explicación propia» no salen de las diapositivas. Las medidas del modelo 3D son de ejemplo.</p>
+</section>
+
+<!-- ============ DESPIECE ============ -->
+<h2 id="despiece">1 · Despiece del motor</h2>
+<p class="lead" style="margin-top:12px">Las diapositivas dividen el motor en cuatro partes: cadena cinemática, sistema de distribución, bloque y culata, y elementos auxiliares. Toca una pieza en el modelo o en la lista.</p>
+<div class="bench">
+  <div class="stage three" id="stageA"><span class="hint">Arrastra para girar · pellizca o rueda para acercar</span></div>
+  <div class="row">
+    <button id="explodeBtn" class="primary" aria-pressed="false">Separar piezas</button>
+    <button id="spinBtn" aria-pressed="false">Girar el cigüeñal</button>
+    <label class="ctl" for="explodeRange">Separación <b id="explodeVal">0 %</b><input id="explodeRange" type="range" min="0" max="100" value="0"></label>
+  </div>
+  <div class="cols two">
+    <div class="parts" id="partList"></div>
+    <div class="info" id="partInfo" aria-live="polite">
+      <div class="grp">Ninguna pieza elegida</div>
+      <div class="name">Toca una pieza</div>
+      <p>El nombre, la función y la diapositiva de la pieza salen aquí.</p>
+    </div>
+  </div>
+  <p class="src">Fuente: T2 diap. 8 (cuatro partes y nombres de piezas), diap. 9 (bujía, inyectores, ECU). Preguntas de piezas: Wuolah fila 3 (preg. 96-101) y fila 4.</p>
+</div>
+
+<!-- ============ CICLO 4T ============ -->
+<h2 id="ciclo4t">2 · Ciclo de 4 tiempos y diagrama p-V</h2>
+<p class="lead" style="margin-top:12px">Dos vueltas de cigüeñal (720°) hacen un ciclo. El punto del diagrama sigue al pistón. Cambia de «Teórico» a «Real» para ver los adelantos y retrasos de las válvulas y el lazo de bombeo.</p>
+<div class="bench">
+  <div class="cols even">
+    <div class="stage three" id="stageB" style="height:min(56vh,420px)"><span class="hint">Arrastra para girar</span></div>
+    <div style="display:grid;gap:8px;align-content:start">
+      <div class="stroke-name" id="strokeName">Admisión</div>
+      <p id="strokeText" style="min-height:4.6em"></p>
+      <div class="readout">
+        <div><span>Ángulo θ</span><b id="roTheta">0°</b></div>
+        <div><span>Vuelta</span><b id="roTurn">1ª</b></div>
+        <div><span>V. admisión</span><b id="roVA">cerrada</b></div>
+        <div><span>V. escape</span><b id="roVE">cerrada</b></div>
+      </div>
+      <div class="svgbox" style="max-width:280px;width:100%"><svg id="distSvg" viewBox="0 0 240 240" role="img" aria-label="Diagrama de distribución"></svg></div>
+    </div>
+  </div>
+  <div class="svgbox"><svg id="pvSvg" viewBox="0 0 640 340" role="img" aria-label="Diagrama p-V"></svg></div>
+  <div class="row">
+    <button id="playBtn" class="primary" aria-pressed="true">Pausa</button>
+    <button id="modeTheo" aria-pressed="true">Teórico</button>
+    <button id="modeReal" aria-pressed="false">Real</button>
+    <button id="logBtn" aria-pressed="false">Ver zona de baja presión</button>
+    <label class="ctl" for="thetaRange">Ángulo del cigüeñal <b id="thetaVal">0°</b><input id="thetaRange" type="range" min="0" max="719" value="0"></label>
+    <label class="ctl" for="speedRange" style="flex:0 1 140px">Velocidad <b id="speedVal">1×</b><input id="speedRange" type="range" min="1" max="4" value="2"></label>
+  </div>
+  <div class="legend">
+    <span><i class="dot" style="background:var(--adm)"></i>Admisión</span>
+    <span><i class="dot" style="background:var(--comp)"></i>Compresión</span>
+    <span><i class="dot" style="background:var(--exp)"></i>Expansión</span>
+    <span><i class="dot" style="background:var(--esc)"></i>Escape</span>
+  </div>
+  <p class="own">Los ángulos del modo «Real» (AAA 10°, RCA 40°, AAE 40°, RCE 10°) y las presiones son valores de ejemplo para dibujar la forma. Las diapositivas solo dan la forma, no los números. El ciclo teórico es un Otto con r = 10 y γ = 1,4.</p>
+  <div class="tablebox"><table>
+    <tr><th>Sigla</th><th>Nombre</th><th>Para qué sirve</th></tr>
+    <tr><td class="num">AAA</td><td>Adelanto de apertura de admisión</td><td>Abre la admisión antes del PMS. Crea el cruce de válvulas.</td></tr>
+    <tr><td class="num">RCA</td><td>Retraso al cierre de admisión</td><td>Cierra la admisión después del PMI. <span class="own" style="display:inline;border:0;padding:0">Aprovecha la inercia del aire para llenar más.</span></td></tr>
+    <tr><td class="num">AAE</td><td>Adelanto de apertura de escape</td><td>Abre el escape antes del PMI: escape espontáneo. Reduce el trabajo de escape forzado (Wuolah fila 3, preg. 124).</td></tr>
+    <tr><td class="num">RCE</td><td>Retraso al cierre de escape</td><td>Cierra el escape después del PMS. Con el AAA forma el cruce.</td></tr>
+  </table></div>
+  <p class="src">Fuente: T2 diap. 18 (4 tiempos, 1ª y 2ª vuelta), diap. 19 (diagrama del indicador, distribución teórica y real, cruce de válvulas = cortocircuito), diap. 20 (diagrama p-α). Cruce al final del escape y principio de la admisión: Wuolah fila 3, preg. 263.</p>
+</div>
+
+<div class="bench">
+  <h3>4T frente a 2T</h3>
+  <div class="tablebox"><table>
+    <tr><th></th><th>4 tiempos</th><th>2 tiempos</th></tr>
+    <tr><td>Ciclo</td><td>2 vueltas de cigüeñal (i = 1/2)</td><td>1 vuelta (i = 1)</td></tr>
+    <tr><td>Renovación</td><td>Válvulas y árbol de levas</td><td>MEP pequeño: barrido por cárter, lumbreras. MEC grande: barrido uniflujo, compresor de barrido aparte, válvula de escape, admisión por lumbreras</td></tr>
+    <tr><td>Uso</td><td>Automoción, la mayoría</td><td>Motores pequeños (simples, baratos, ligeros, pierden aceite) y motores marinos muy grandes y lentos</td></tr>
+    <tr><td>η<sub>v</sub></td><td>Se define solo para 4T (máx. 0,9-0,95)</td><td>No se aplica</td></tr>
+  </table></div>
+  <p class="src">Fuente: T2 diap. 21-23 (2T), diap. 49 (rendimiento volumétrico), diap. 47 (i).</p>
+</div>
+
+<!-- ============ BIELA ============ -->
+<h2 id="biela">3 · Mecanismo biela-manivela</h2>
+<p class="lead" style="margin-top:12px">El pistón va y viene; el cigüeñal gira. Mueve α y mira la velocidad del pistón. Con λ = R/L más grande, la curva se deforma más.</p>
+<div class="bench">
+  <div class="cols even">
+    <div class="svgbox" style="max-width:300px;width:100%;justify-self:center"><svg id="bmSvg" viewBox="0 0 260 340" role="img" aria-label="Esquema biela-manivela"></svg></div>
+    <div class="svgbox"><svg id="bmPlot" viewBox="0 0 360 260" role="img" aria-label="Velocidad del pistón"></svg></div>
+  </div>
+  <div class="row">
+    <label class="ctl" for="alphaRange">Ángulo α <b id="alphaVal">60°</b><input id="alphaRange" type="range" min="0" max="360" value="60"></label>
+    <label class="ctl" for="lambdaRange">λ = R/L <b id="lambdaVal">0,30</b><input id="lambdaRange" type="range" min="15" max="45" value="30"></label>
+  </div>
+  <div class="readout">
+    <div><span>s(α)/S</span><b id="bmS">-</b></div>
+    <div><span>c/(ωR)</span><b id="bmC">-</b></div>
+    <div><span>c/c<sub>m</sub></span><b id="bmCm">-</b></div>
+  </div>
+  <div class="formula">c(α) ≈ ωR·(sin α + λ/2·sin 2α) &nbsp;·&nbsp; c<sub>m</sub> = 2·S·n &nbsp;·&nbsp; R = S/2</div>
+  <div class="tablebox"><table>
+    <tr><th>Motor</th><th>n [rpm]</th><th>c<sub>m</sub> [m/s]</th></tr>
+    <tr><td>MEP automóvil 4T</td><td class="num">7500</td><td class="num">20</td></tr>
+    <tr><td>MEP motocicletas 4T</td><td class="num">13500</td><td class="num">19</td></tr>
+    <tr><td>MEP competición (F1) 4T</td><td class="num">18000</td><td class="num">25</td></tr>
+    <tr><td>MEP 2T pequeños</td><td class="num">20000</td><td class="num">19</td></tr>
+    <tr><td>MEC automóvil</td><td class="num">5000</td><td class="num">15</td></tr>
+    <tr><td>MEC industrial / pesado</td><td class="num">2200</td><td class="num">13</td></tr>
+    <tr><td>MEC 2T grandes</td><td class="num">200</td><td class="num">8</td></tr>
+  </table></div>
+  <p class="own">La velocidad máxima del pistón no está en α = 90°. Con λ > 0 está algo antes, cerca de 75°. La c<sub>m</sub> media mide el desgaste: por eso los motores grandes giran despacio.</p>
+  <p class="src">Fuente: T2 diap. 46 (velocidad instantánea y media del pistón, tabla de n y c<sub>m</sub>), diap. 45 (S/D: deportivos 0,8-0,9, turismos 0,95-1,05, industriales 1,1-1,2).</p>
+</div>
+
+<!-- ============ CICLOS TEÓRICOS ============ -->
+<h2 id="ciclos">4 · Ciclos teóricos de aire</h2>
+<p class="lead" style="margin-top:12px">Elige un ciclo y mueve r, γ, α y β. El rendimiento sale de las fórmulas de la diapositiva 57.</p>
+<div class="bench">
+  <div class="row">
+    <button class="cyc" data-c="otto" aria-pressed="true">Otto (V cte) · MEP</button>
+    <button class="cyc" data-c="diesel" aria-pressed="false">Diesel (p cte) · MEC lentos</button>
+    <button class="cyc" data-c="pl" aria-pressed="false">Presión limitada · MEC rápidos</button>
+  </div>
+  <div class="cols even">
+    <div class="svgbox"><svg id="cycSvg" viewBox="0 0 360 280" role="img" aria-label="Ciclo teórico p-v"></svg></div>
+    <div class="svgbox"><svg id="etaSvg" viewBox="0 0 360 280" role="img" aria-label="Rendimiento frente a r"></svg></div>
+  </div>
+  <div class="row">
+    <label class="ctl" for="rRange">r = v₁/v₂ <b id="rVal">10</b><input id="rRange" type="range" min="4" max="22" value="10" step="0.5"></label>
+    <label class="ctl" for="gRange">γ <b id="gVal">1,40</b><input id="gRange" type="range" min="1.25" max="1.45" value="1.4" step="0.01"></label>
+    <label class="ctl" for="aRange" id="aLbl">α = p₃/p₂ <b id="aVal">2,0</b><input id="aRange" type="range" min="1" max="4" value="2" step="0.1"></label>
+    <label class="ctl" for="bRange" id="bLbl">β = v₃/v₂ <b id="bVal">2,0</b><input id="bRange" type="range" min="1.05" max="4" value="2" step="0.05"></label>
+  </div>
+  <div class="readout">
+    <div><span>η teórico</span><b id="etaOut">-</b></div>
+    <div><span>p₂/p₁</span><b id="p2Out">-</b></div>
+    <div><span>p máx/p₁</span><b id="pmOut">-</b></div>
+  </div>
+  <div class="formula" id="cycFormula"></div>
+  <p class="own">En Otto, α solo cambia el dibujo: el rendimiento depende solo de r y γ. En Diesel, más β (más combustible) baja el rendimiento. Con la misma r, Diesel rinde menos que Otto; pero un MEC trabaja con r mucho mayor (15-18 frente a 9-11).</p>
+  <p class="src">Fuente: T2 diap. 56 (hipótesis, coeficiente de calidad = η<sub>e</sub>/η<sub>teórico</sub>), diap. 57 (tres ciclos y fórmulas), diap. 58 (efecto de γ: aire 1,4 frente a gases 1,3; MEC peor η con la misma r), diap. 45 (r MEP 9-11, MEC 15-18).</p>
+</div>
+
+<div class="bench">
+  <h3>Del ciclo teórico al real</h3>
+  <div class="tablebox"><table>
+    <tr><th>Escalón</th><th>Rendimiento</th><th>Qué se pierde</th></tr>
+    <tr><td>Carnot</td><td class="num">≈ 0,85</td><td>Límite: foco caliente = combustión (&gt; 2000 °C), foco frío = atmósfera</td></tr>
+    <tr><td>Ciclo teórico</td><td class="num">0,55 (MEP) - 0,68 (MEC)</td><td>η = 1 − 1/r<sup>γ−1</sup></td></tr>
+    <tr><td>Ciclo real (indicado)</td><td class="num">η<sub>i</sub> = 0,40 - 0,57</td><td>Calor por paredes; tiempo (combustión no instantánea); escape no instantáneo y pérdidas de carga</td></tr>
+    <tr><td>Efectivo (eje)</td><td class="num">η<sub>e</sub> = 0,30 - 0,52</td><td>Rozamiento; bombeo (crece al estrangular la admisión; bomba de barrido en 2T); auxiliares</td></tr>
+  </table></div>
+  <p class="src">Fuente: T2 diap. 60 (teórico frente a real), diap. 61 (aprovechamiento energético).</p>
+</div>
+
+<!-- ============ BALANCE ============ -->
+<h2 id="balance">5 · Balance energético y combustión en MCIA</h2>
+<div class="bench">
+  <h3>¿A dónde va la energía del combustible?</h3>
+  <div class="svgbox"><svg id="balSvg" viewBox="0 0 640 170" role="img" aria-label="Balance energético"></svg></div>
+  <div class="formula">ṁ<sub>f</sub>·H<sub>c</sub> = P<sub>e</sub> + P<sub>aux</sub> + Q̇<sub>r</sub> + Q̇<sub>a</sub> + Q̇<sub>conv</sub> + Q̇<sub>ge</sub> + Q̇<sub>res</sub></div>
+  <p class="src">Fuente: T2 diap. 53. Valores medios del rango de cada término; toca una barra para ver el rango. El rozamiento (Q<sub>roz</sub>) acaba en el refrigerante y en el aceite.</p>
+  <p id="balInfo" class="info" style="min-height:0">Toca una barra.</p>
+</div>
+
+<div class="bench">
+  <h3>MEP frente a MEC</h3>
+  <div class="tablebox"><table>
+    <tr><th></th><th>MEP (encendido provocado)</th><th>MEC (encendido por compresión)</th></tr>
+    <tr><td>Mezcla</td><td>Premezclada. Homogénea (inyección en conducto o directa en admisión) o estratificada (directa al final de la compresión)</td><td>Entra solo aire. Inyección directa al final de la compresión. Dosado local muy heterogéneo</td></tr>
+    <tr><td>Encendido</td><td>Chispa (bujía). Frente de llama subsónico: deflagración</td><td>Autoinflamación: retraso → combustión premezclada → combustión por difusión</td></tr>
+    <tr><td>Regulación de carga</td><td>Homogénea: cuantitativa (mariposa). Estratificada: cualitativa</td><td>Cualitativa (más o menos combustible)</td></tr>
+    <tr><td>Combustible</td><td>Ligero, volátil, alto nº de octano (gasolina, GN, GLP, etanol)</td><td>Pesado, poco volátil, baja T de autoinflamación (gasóleo, biodiésel)</td></tr>
+    <tr><td>r</td><td class="num">9-11</td><td class="num">15-18</td></tr>
+    <tr><td>pme máx.</td><td class="num">13-17 bar</td><td class="num">23 bar</td></tr>
+    <tr><td>g<sub>ef</sub></td><td class="num">210-350 g/kWh</td><td class="num">180-300 g/kWh</td></tr>
+    <tr><td>Problema</td><td>Picado (knock): la mezcla final se autoinflama delante del frente de llama → onda de choque</td><td>Ruido de combustión</td></tr>
+  </table></div>
+  <p class="src">Fuente: T2 diap. 12-17 (combustión y mezcla), diap. 45 (r), diap. 48 (pme), diap. 49 (g<sub>ef</sub>).</p>
+</div>
+
+<!-- ============ T1 ============ -->
+<h2 id="t1">6 · Tema 1 en imágenes</h2>
+<div class="bench">
+  <h3>Mapa de clasificación</h3>
+  <div class="row">
+    <button class="tmap" data-m="maq" aria-pressed="true">Máquinas térmicas</button>
+    <button class="tmap" data-m="mot" aria-pressed="false">Motores térmicos</button>
+  </div>
+  <div id="mapMaq" class="tree">
+    <div class="node"><b>Máquina térmica</b><small>Máquina de fluido compresible. Intercambia energía mecánica por un eje con la variación de energía térmica del fluido.</small></div>
+    <div class="kids">
+      <div class="node"><b>Según el sentido</b><small><b style="font-size:14px">Motoras (expansores):</b> el fluido baja su estado térmico; se obtiene energía mecánica.<br><b style="font-size:14px">Generadoras (compresores):</b> el fluido sube su estado térmico; se pide energía mecánica.</small></div>
+      <div class="node"><b>Volumétricas</b><small>Variación de volumen de control · flujo discontinuo · velocidades bajas → caudales pequeños · baja fricción fluida · no adiabáticas.<br>Alternativas; rotativas (scroll, tornillo, paletas); sin compresión: roots.</small></div>
+      <div class="node"><b>Turbomáquinas</b><small>Acción dinámica · rotativas · flujo continuo · velocidades altas → caudales grandes · alta fricción fluida · adiabáticas.<br>Escalonamientos de álabes móviles (rotor) y fijos (estator). Axiales, radiales, mixtas.</small></div>
+    </div>
+  </div>
+  <div id="mapMot" class="tree" hidden>
+    <div class="node"><b>Motor térmico</b><small>Obtiene energía mecánica, normalmente por un eje, del estado térmico de una combustión, reacción nuclear, radiación solar concentrada o un intercambiador de calor.</small></div>
+    <div class="kids">
+      <div class="node"><b>Ciclo abierto / cerrado</b><small><b style="font-size:14px">Cerrado:</b> el fluido repite el ciclo; calor por intercambiador; manda la T atmosférica; debe ser de combustión externa.<br><b style="font-size:14px">Abierto:</b> el fluido se renueva y pasa una vez; no debe tener coste; manda la p atmosférica; suele ser de combustión interna.</small></div>
+      <div class="node"><b>Combustión interna / externa</b><small><b style="font-size:14px">Externa:</b> calor a través de una superficie; T máx. limitada; baja potencia específica; combustibles de baja calidad; el fluido no cambia químicamente.<br><b style="font-size:14px">Interna:</b> combustión en el fluido; T máx. muy altas; alta potencia específica; combustibles de alta calidad; debe ser de ciclo abierto.</small></div>
+      <div class="node"><b>Eje rotativo / reacción</b><small><b style="font-size:14px">Eje:</b> Ẇ = M·ω. Volumétricos (MCIA, Wankel) o de flujo continuo (TG, TV).<br><b style="font-size:14px">Reacción:</b> empuje E = ṁ(c<sub>s</sub> − c<sub>e</sub>), solo propulsión. Cohetes (llevan comburente; funcionan en vacío) y aerorreactores (sin compresor: estatorreactor, pulsorreactor; con compresor: turborreactor, turbofán).</small></div>
+    </div>
+  </div>
+  <p class="src">Fuente: T1 diap. 4-6 (definiciones), 10-13 (máquinas), 15-19 (motores).</p>
+</div>
+
+<div class="bench">
+  <h3>Rendimiento de cada motor</h3>
+  <div class="svgbox"><svg id="etaBars" viewBox="0 0 640 230" role="img" aria-label="Rangos de rendimiento"></svg></div>
+  <div class="tablebox"><table>
+    <tr><th>Motor</th><th>Potencia usual</th><th>Cargas parciales</th><th>Arranque</th></tr>
+    <tr><td>MCIA (diésel o gas)</td><td class="num">&lt; 10 MW cog. · &lt; 40 MW g.e. (hasta 80 MW)</td><td>Pérdidas mínimas</td><td>Muy rápido</td></tr>
+    <tr><td>Turbina de gas</td><td class="num">100 kW - 600 MW</td><td>Pérdidas altas</td><td>Muy rápido</td></tr>
+    <tr><td>Turbina de vapor</td><td class="num">1 MW - 1600 MW</td><td>Pérdidas moderadas</td><td>Lento</td></tr>
+    <tr><td>Ciclo combinado</td><td class="num">40 MW - 1200 MW</td><td>Pérdidas moderadas</td><td>Relativamente lento</td></tr>
+  </table></div>
+  <p class="src">Fuente: T1 diap. 21, 23, 25, 26 (características) y diap. 40 (resumen).</p>
+</div>
+
+<div class="bench">
+  <h3>Cogeneración: prueba los números</h3>
+  <div class="row">
+    <label class="ctl" for="cgWe">Ẇ<sub>e</sub> (% de ṁ<sub>f</sub>H<sub>c</sub>) <b id="cgWeV">40</b><input id="cgWe" type="range" min="10" max="60" value="40"></label>
+    <label class="ctl" for="cgQu">Q̇<sub>u</sub> útil (%) <b id="cgQuV">40</b><input id="cgQu" type="range" min="0" max="60" value="40"></label>
+    <label class="ctl" for="cgEr">η<sub>ref</sub> caldera <b id="cgErV">0,90</b><input id="cgEr" type="range" min="70" max="100" value="90"></label>
+  </div>
+  <div class="readout">
+    <div><span>η global</span><b id="cgG">-</b></div>
+    <div><span>REE</span><b id="cgR">-</b></div>
+  </div>
+  <div class="formula">η<sub>global</sub> = (Ẇ<sub>e</sub> + Q̇<sub>u</sub>)/(ṁ<sub>f</sub>H<sub>c</sub>) &nbsp;·&nbsp; REE = Ẇ<sub>e</sub>/(ṁ<sub>f</sub>H<sub>c</sub> − Q̇<sub>u</sub>/η<sub>ref</sub>)</div>
+  <p class="own">El REE descuenta el combustible que una caldera necesitaría para dar el mismo calor útil. Así compara la cogeneración con producir solo electricidad.</p>
+  <p class="src">Fuente: T1 diap. 42 (ciclo combinado: η = (Ẇ<sub>TG</sub> + Ẇ<sub>TV</sub>)/ṁ<sub>f</sub>H<sub>c</sub>, hasta 63 %), diap. 43 (cogeneración, rendimiento global y eléctrico equivalente). T2 diap. 54 (fuentes de calor del MCIA: gases de escape, agua de cilindros, aceite, aire de sobrealimentación).</p>
+</div>
+
+<div class="bench">
+  <h3>Dosado: rico o pobre</h3>
+  <div class="row">
+    <label class="ctl" for="dx">x (átomos de C) <b id="dxV">8</b><input id="dx" type="range" min="1" max="16" value="8"></label>
+    <label class="ctl" for="dy">y (átomos de H) <b id="dyV">18</b><input id="dy" type="range" min="0" max="34" value="18"></label>
+    <label class="ctl" for="dfr">F<sub>R</sub> <b id="dfrV">1,00</b><input id="dfr" type="range" min="40" max="160" value="100"></label>
+  </div>
+  <div class="svgbox"><svg id="dosSvg" viewBox="0 0 640 90" role="img" aria-label="Escala de dosado relativo"></svg></div>
+  <div class="readout">
+    <div><span>F<sub>e</sub></span><b id="doFe">-</b></div>
+    <div><span>1/F<sub>e</sub> (aire/comb.)</span><b id="doAf">-</b></div>
+    <div><span>λ = 1/F<sub>R</sub></span><b id="doL">-</b></div>
+    <div><span>Mezcla</span><b id="doT">-</b></div>
+    <div><span>kg CO₂/kg comb.</span><b id="doCO2">-</b></div>
+  </div>
+  <div class="formula">C<sub>x</sub>H<sub>y</sub> + a(O₂ + 3,76 N₂) → x CO₂ + y/2 H₂O + 3,76a N₂ &nbsp;·&nbsp; a = x + y/4 &nbsp;·&nbsp; F<sub>e</sub> = (12x + y)/(137,28·a) &nbsp;·&nbsp; CO₂ = 44/(12 + y/x)</div>
+  <p class="src">Fuente: T1 diap. 46-47 (estequiometría, dosado absoluto, estequiométrico y relativo, λ, emisión de CO₂). NO<sub>x</sub> máximo con F<sub>R</sub> ≈ 0,9: T1 diap. 51. MEP homogéneo: F<sub>R</sub> = 1 con catalizador de 3 vías, 0,8-1,15 sin él: T2 diap. 14.</p>
+</div>
+
+<div class="bench">
+  <h3>Emisiones</h3>
+  <div class="tablebox"><table>
+    <tr><th>Contaminante</th><th>Cómo se forma</th><th>Efecto</th></tr>
+    <tr><td>CO</td><td>Producto intermedio. Alta T y poco O₂; la reacción se congela al enfriar</td><td>Muy asfixiante. Nivel local (garajes, túneles)</td></tr>
+    <tr><td>NO<sub>x</sub></td><td>N₂ + O₂ ⇌ 2NO a T muy altas (1550 °C). Favorecido por exceso de O₂: máximo con F<sub>R</sub> ≈ 0,9</td><td>NO asfixiante; NO₂ irritante, daña el pulmón</td></tr>
+    <tr><td>HC y COV</td><td>Llama apagada o sin encender: mezclas ricas o muy pobres, zonas frías</td><td>Aromáticos irritantes; algunos cancerígenos</td></tr>
+    <tr><td>PM</td><td>Deshidrogenación a muy alta T sin O₂ → hollín. Nucleación, crecimiento, agregación, condensación</td><td>&lt; 2,5 μm llegan a los alveolos</td></tr>
+    <tr><td>CO₂</td><td>Inherente a todo combustible con carbono</td><td>Gas de efecto invernadero. Problema global, no contaminante</td></tr>
+  </table></div>
+  <p class="src">Fuente: T1 diap. 49 (primarios: CO, NO<sub>x</sub>, HC-COV, SO<sub>x</sub>, PM; secundarios: O₃ y otros), diap. 50 (niveles), diap. 51-52.</p>
+</div>
+
+<!-- ============ TEST ============ -->
+<h2 id="test">7 · Test rápido</h2>
+<p class="lead" style="margin-top:12px">Preguntas de los tests de Wuolah. Cada una dice de qué archivo sale y qué diapositiva la respalda.</p>
+<div class="row" style="margin-top:12px"><span class="score" id="score">0 de 0</span><button id="resetQuiz">Empezar de nuevo</button></div>
+<div class="quiz" id="quiz" style="margin-top:12px"></div>
+
+<p class="src" style="margin-top:32px">Archivo: Uni/Maquinas/MyMT-PEI1-estudio-3d-v2.html · 10 nov 2026 · fuentes en la carpeta del Máster (Moodle T1 y T2, materials/Examenes).</p>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = (v,d=2) => v.toFixed(d).replace('.',',');
+const SVGNS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Engine geometry (example values, r = 10) ---------- */
+const G = { R:0.45, L:1.5, rp:0.44, crownOff:0.3, ph:0.55, hc:0.1 };
+G.S = 2*G.R;
+G.headY = G.R + G.L + G.crownOff + G.hc;     // 2.35
+function pinY(a){ const s=G.R*Math.sin(a); return G.R*Math.cos(a) + Math.sqrt(G.L*G.L - s*s); }
+function dispFrac(a){ // s(α)/S from PMS
+  const lam=G.R/G.L, s=Math.sin(a);
+  return (G.R*(1-Math.cos(a)) + G.L*(1-Math.sqrt(1-lam*lam*s*s)))/G.S;
+}
+
+const PARTS = {
+  bloque:{name:'Bloque y camisa',grp:'Bloque de cilindros y culatas',text:'El bloque aloja los cilindros e incluye la fijación del cigüeñal. La camisa es la pared por la que se mueve el pistón.',src:'T2 diap. 8'},
+  culata:{name:'Culata',grp:'Bloque de cilindros y culatas',text:'Cierra el cilindro por arriba. Con el pistón en el PMS deja el volumen final de compresión V_C.',own:'Aloja los asientos de las válvulas y la bujía o el inyector (foto de culata en diap. 9).',src:'T2 diap. 8-9, 45'},
+  vadm:{name:'Válvula de admisión',grp:'Sistema de distribución',text:'Deja entrar la carga fresca: mezcla en MEP, solo aire en MEC.',src:'T2 diap. 8, 12, 16'},
+  vesc:{name:'Válvula de escape',grp:'Sistema de distribución',text:'Deja salir los gases quemados. El AAE la abre antes del PMI.',src:'T2 diap. 8, 19'},
+  levas:{name:'Árbol de levas',grp:'Sistema de distribución',text:'Sus levas empujan las válvulas (con taqués y empujadores). La correa de distribución lo mueve desde el cigüeñal.',own:'En 4T gira a la mitad de velocidad que el cigüeñal: una vuelta de levas por ciclo de 720°.',src:'T2 diap. 8; Wuolah fila 3, preg. 99'},
+  bujia:{name:'Bujía (MEP) / inyector (MEC)',grp:'Encendido e inyección',text:'MEP: la chispa de la bujía empieza la combustión. MEC: el inyector de alta presión mete el combustible al final de la compresión; la mezcla se autoinflama.',src:'T2 diap. 9, 13, 16'},
+  piston:{name:'Pistón y segmentos',grp:'Cadena cinemática',text:'Recibe la fuerza de la presión del gas: dW = p·dV. Los segmentos cierran el hueco con la camisa. Partes del pistón: cabeza, falda, segmentos.',src:'T2 diap. 5, 8; Wuolah fila 3, preg. 96-97'},
+  bulon:{name:'Bulón',grp:'Cadena cinemática',text:'Une el pistón con el pie de la biela. Va alojado en el pistón.',src:'T2 diap. 8; Wuolah fila 4 (elemento alojado en el pistón)'},
+  biela:{name:'Biela (pie, cuerpo, cabeza)',grp:'Cadena cinemática',text:'Pasa el movimiento de traslación del pistón a rotación del cigüeñal. El pie va al bulón; la cabeza va a la muñequilla del cigüeñal.',src:'T2 diap. 4, 8; Wuolah fila 3, preg. 100'},
+  cig:{name:'Cigüeñal',grp:'Cadena cinemática',text:'Da el par en el eje: Ẇe = Me·2πn. Partes: apoyos, muñequilla, brazos y contrapesos. El bulón no es parte del cigüeñal.',src:'T2 diap. 8, 48; Wuolah fila 3, preg. 98'},
+  carter:{name:'Cárter',grp:'Elementos auxiliares',text:'Guarda el aceite bajo el cigüeñal. La bomba de aceite aspira el lubricante desde el cárter.',src:'T2 diap. 8-9; Wuolah fila 4'}
+};
+const GROUP_ORDER = ['Cadena cinemática','Sistema de distribución','Bloque de cilindros y culatas','Encendido e inyección','Elementos auxiliares'];
+
+function buildEngine(withGas){
+  const root = new THREE.Group();
+  const parts = {};
+  const metal = (c,o) => new THREE.MeshStandardMaterial(Object.assign({color:c,metalness:0.55,roughness:0.42},o||{}));
+  const ghost = (c,op) => new THREE.MeshStandardMaterial({color:c,metalness:0.2,roughness:0.6,transparent:true,opacity:op,side:THREE.DoubleSide,depthWrite:false});
+  function part(key, obj, offset){ obj.traverse(o=>{ if(o.isMesh){ o.userData.part=key; o.userData.baseEmissive=o.material.emissive?o.material.emissive.getHex():0; } }); root.add(obj); parts[key]={obj,offset:new THREE.Vector3(...offset),base:new THREE.Vector3()}; return obj; }
+
+  // Block / liner
+  const blk = new THREE.Group();
+  const linerH = G.headY - 0.95;
+  const liner = new THREE.Mesh(new THREE.CylinderGeometry(G.rp+0.03,G.rp+0.03,linerH,48,1,true), ghost(0x8fa3b8,0.22));
+  liner.position.y = 0.95 + linerH/2; blk.add(liner);
+  const boxG = new THREE.BoxGeometry(1.35,linerH,1.05);
+  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(boxG), new THREE.LineBasicMaterial({color:0x7d8fa3}));
+  edges.position.y = liner.position.y; blk.add(edges);
+  const shell = new THREE.Mesh(boxG, ghost(0x9aaabb,0.08)); shell.position.y=liner.position.y; blk.add(shell);
+  part('bloque', blk, [0,0,0]);
+
+  // Head
+  const head = new THREE.Group();
+  const hm = new THREE.Mesh(new THREE.BoxGeometry(1.35,0.5,1.05), ghost(0x6f7f91,0.35)); hm.position.y = G.headY+0.25; head.add(hm);
+  const he = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.35,0.5,1.05)), new THREE.LineBasicMaterial({color:0x56677a})); he.position.y=hm.position.y; head.add(he);
+  part('culata', head, [0,1.25,0]);
+
+  // Valves
+  function valve(x, color){
+    const g = new THREE.Group();
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.028,0.028,0.78,12), metal(color));
+    stem.position.y = 0.41; g.add(stem);
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.09,0.05,28), metal(color)); disc.position.y=0.025; g.add(disc);
+    const spring = new THREE.Mesh(new THREE.TorusGeometry(0.06,0.012,6,20), metal(0x444c55)); spring.rotation.x=Math.PI/2; spring.position.y=0.62; g.add(spring);
+    g.position.set(x, G.headY, 0);
+    return g;
+  }
+  const vA = part('vadm', valve(-0.2, 0x5b8fd9), [-0.35,2.0,0]);
+  const vE = part('vesc', valve(0.2, 0xd98a5b), [0.35,2.0,0]);
+
+  // Camshafts (DOHC, one over each valve)
+  function camshaft(x){
+    const g = new THREE.Group();
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,1.0,16), metal(0x7b858f)); shaft.rotation.x=Math.PI/2; g.add(shaft);
+    const lobe = new THREE.Group();
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.085,0.085,0.1,24), metal(0x9aa4ae)); base.rotation.x=Math.PI/2; lobe.add(base);
+    const nose = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.1,20), metal(0x9aa4ae)); nose.rotation.x=Math.PI/2; nose.position.y=-0.07; lobe.add(nose);
+    g.add(lobe); g.userData.lobe=lobe;
+    g.position.set(x, G.headY+0.95, 0);
+    return g;
+  }
+  const levas = new THREE.Group();
+  const camA = camshaft(-0.2), camE = camshaft(0.2); levas.add(camA, camE);
+  part('levas', levas, [0,2.5,0]);
+
+  // Spark plug
+  const plug = new THREE.Group();
+  const pc = new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,0.5,12), metal(0xd8dde2,{metalness:0.2})); pc.position.y=0.25; plug.add(pc);
+  const ph = new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.12,6), metal(0x9aa4ae)); ph.position.y=0.42; plug.add(ph);
+  const spark = new THREE.Mesh(new THREE.SphereGeometry(0.09,16,12), new THREE.MeshBasicMaterial({color:0xfff2a0,transparent:true,opacity:0}));
+  spark.position.y = -0.02; plug.add(spark);
+  plug.position.set(0, G.headY, 0.27);
+  part('bujia', plug, [0,2.3,0.4]);
+
+  // Piston
+  const pist = new THREE.Group();
+  const pm = new THREE.Mesh(new THREE.CylinderGeometry(G.rp,G.rp,G.ph,48), metal(0xb9c0c8,{metalness:0.45})); pm.position.y=-G.ph/2; pist.add(pm);
+  for(let i=0;i<3;i++){ const ring=new THREE.Mesh(new THREE.TorusGeometry(G.rp+0.004,0.012,6,48), metal(0x3c434a)); ring.rotation.x=Math.PI/2; ring.position.y=-0.06-0.05*i; pist.add(ring); }
+  part('piston', pist, [-1.45,0.7,0]);
+
+  // Gudgeon pin
+  const bul = new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.7,20), metal(0x8a939c)); bul.rotation.x=Math.PI/2;
+  const bulG = new THREE.Group(); bulG.add(bul);
+  part('bulon', bulG, [-1.45,0.7,0.95]);
+
+  // Connecting rod (pivot at crankpin, +Y towards pin)
+  const rod = new THREE.Group();
+  const bigEnd = new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.14,0.16,28), metal(0x6d7a88)); bigEnd.rotation.x=Math.PI/2; rod.add(bigEnd);
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.11,G.L-0.24,0.1), metal(0x6d7a88)); body.position.y=G.L/2; rod.add(body);
+  const small = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.14,24), metal(0x6d7a88)); small.rotation.x=Math.PI/2; small.position.y=G.L; rod.add(small);
+  part('biela', rod, [1.35,0.2,0]);
+
+  // Crankshaft (rotates about Z)
+  const crank = new THREE.Group();
+  for(const z of [-0.36,0.36]){ const j=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.22,24), metal(0x8d969f)); j.rotation.x=Math.PI/2; j.position.z=z; crank.add(j); }
+  for(const z of [-0.2,0.2]){
+    const web=new THREE.Mesh(new THREE.BoxGeometry(0.3,G.R+0.24,0.08), metal(0x5f6973)); web.position.set(0,G.R/2,z); crank.add(web);
+    const cw=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.4,0.08,32,1,false,-Math.PI/2,Math.PI), metal(0x5f6973)); cw.rotation.x=Math.PI/2; cw.position.z=z; crank.add(cw);
+  }
+  const pinM = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.34,24), metal(0xa9b2bb)); pinM.rotation.x=Math.PI/2; pinM.position.y=G.R; crank.add(pinM);
+  part('cig', crank, [0,-1.0,0]);
+
+  // Sump
+  const sump = new THREE.Group();
+  const sg = new THREE.BoxGeometry(1.45,0.55,1.1);
+  const sm = new THREE.Mesh(sg, ghost(0x8a7a52,0.18)); sm.position.y=-0.85; sump.add(sm);
+  const se = new THREE.LineSegments(new THREE.EdgesGeometry(sg), new THREE.LineBasicMaterial({color:0x8a7a52})); se.position.y=-0.85; sump.add(se);
+  const oil = new THREE.Mesh(new THREE.BoxGeometry(1.4,0.16,1.05), ghost(0xb08a2a,0.45)); oil.position.y=-1.03; sump.add(oil);
+  part('carter', sump, [0,-1.7,0]);
+
+  // Gas column (cycle scene only)
+  let gas=null;
+  if(withGas){
+    gas = new THREE.Mesh(new THREE.CylinderGeometry(G.rp-0.01,G.rp-0.01,1,40), new THREE.MeshBasicMaterial({color:0x2a66c9,transparent:true,opacity:0.4,depthWrite:false}));
+    root.add(gas);
+  }
+
+  const state = {alpha:0.7, explode:0, liftA:0, liftE:0, camPhase:0, spark:0, gasColor:null};
+  function update(){
+    const a=state.alpha, e=state.explode;
+    const cpx = G.R*Math.sin(a), cpy=G.R*Math.cos(a);
+    const py = pinY(a), crown = py + G.crownOff;
+    const set=(k,x,y,z)=>{ const p=parts[k]; p.obj.position.set(x+p.offset.x*e, y+p.offset.y*e, z+p.offset.z*e); };
+    set('bloque',0,0,0); set('culata',0,0,0); set('carter',0,0,0);
+    set('vadm',-0.2,G.headY - state.liftA,0); set('vesc',0.2,G.headY - state.liftE,0);
+    set('levas',0,0,0); set('bujia',0,G.headY,0.27);
+    set('piston',0,crown,0); set('bulon',0,py,0);
+    set('biela',cpx,cpy,0); parts.biela.obj.rotation.z = Math.atan2(cpx, py-cpy);
+    set('cig',0,0,0); parts.cig.obj.rotation.z = -a;
+    camA.userData.lobe.rotation.z = state.camA||0; camE.userData.lobe.rotation.z = state.camE||0;
+    spark.material.opacity = state.spark;
+    if(gas){
+      const h = G.headY - crown; gas.scale.y = Math.max(h,0.001); gas.position.y = crown + h/2;
+      if(state.gasColor!==null) gas.material.color.setHex(state.gasColor);
+    }
+  }
+  return {root, parts, state, update};
+}
+
+function makeViewer(stageEl, withGas, camPos){
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  stageEl.insertBefore(renderer.domElement, stageEl.firstChild);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  camera.position.set(...camPos);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 0.85));
+  const d1 = new THREE.DirectionalLight(0xffffff, 0.9); d1.position.set(4,6,5); scene.add(d1);
+  const d2 = new THREE.DirectionalLight(0xbfd4ff, 0.35); d2.position.set(-5,2,-4); scene.add(d2);
+  const eng = buildEngine(withGas);
+  scene.add(eng.root);
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.target.set(0, 0.9, 0); controls.enableDamping = true; controls.enablePan = false;
+  controls.minDistance = 3; controls.maxDistance = 18;
+  controls.update();
+  let dirty = true, visible = true;
+  controls.addEventListener('change', ()=>{ dirty=true; });
+  function resize(){
+    const w = stageEl.clientWidth, h = stageEl.clientHeight;
+    renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix(); dirty = true;
+  }
+  new ResizeObserver(resize).observe(stageEl); resize();
+  if('IntersectionObserver' in window){ new IntersectionObserver(es=>{ visible = es[0].isIntersecting; if(visible) dirty=true; }).observe(stageEl); }
+  return {renderer, scene, camera, controls, eng, markDirty(){dirty=true;}, frame(){ const moved = controls.update(); if(visible && (dirty||moved)){ eng.update(); renderer.render(scene,camera); dirty=false; } }, isVisible:()=>visible};
+}
+
+const hasGL = (()=>{ try{ const c=document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl')||c.getContext('experimental-webgl'))); }catch(e){ return false; } })();
+let VA=null, VB=null;
+if(window.THREE && THREE.OrbitControls && hasGL){
+  VA = makeViewer($('stageA'), false, [4.6,3.0,6.2]);
+  VB = makeViewer($('stageB'), true, [4.6,2.8,6.4]);
+} else {
+  for(const id of ['stageA','stageB']){ const p=document.createElement('p'); p.style.padding='16px'; p.textContent='Este navegador no muestra 3D (WebGL o three.js no cargó). El resto de la página funciona.'; $(id).appendChild(p); }
+}
+
+/* ---------- Section 1: explode viewer ---------- */
+let selected = null, explodeTarget = 0, spinning = false;
+const partBtns = {};
+(function buildList(){
+  const host = $('partList');
+  for(const g of GROUP_ORDER){
+    const box = document.createElement('div'); box.className='pgroup';
+    const h = document.createElement('h4'); h.textContent = g; box.appendChild(h);
+    const row = document.createElement('div'); row.className='row';
+    for(const k in PARTS){ if(PARTS[k].grp!==g) continue;
+      const b = document.createElement('button'); b.type='button'; b.textContent = PARTS[k].name; b.setAttribute('aria-pressed','false');
+      b.addEventListener('click', ()=>selectPart(selected===k?null:k)); partBtns[k]=b; row.appendChild(b);
+    }
+    box.appendChild(row); host.appendChild(box);
+  }
+})();
+function selectPart(k){
+  selected = k;
+  for(const kk in partBtns) partBtns[kk].setAttribute('aria-pressed', kk===k?'true':'false');
+  const info = $('partInfo');
+  if(!k){ info.innerHTML = '<div class="grp">Ninguna pieza elegida</div><div class="name">Toca una pieza</div><p>El nombre, la función y la diapositiva de la pieza salen aquí.</p>'; }
+  else { const p=PARTS[k]; info.innerHTML = '<div class="grp">'+p.grp+'</div><div class="name">'+p.name+'</div><p>'+p.text+'</p>'+(p.own?'<p class="own">'+p.own+'</p>':'')+'<p class="src">Fuente: '+p.src+'</p>'; }
+  if(VA){
+    const accent = new THREE.Color(css('--accent')||'#1f5fa8');
+    for(const kk in VA.eng.parts){ VA.eng.parts[kk].obj.traverse(o=>{ if(o.isMesh && o.material.emissive){ if(kk===k){ o.material.emissive.copy(accent).multiplyScalar(0.55); if(o.material.transparent){ o.material.userData.op = o.material.userData.op ?? o.material.opacity; o.material.opacity = Math.min(1,(o.material.userData.op)*2.5);} } else { o.material.emissive.setHex(0); if(o.material.userData.op!==undefined) o.material.opacity=o.material.userData.op; } } }); }
+    VA.markDirty();
+  }
+}
+function setExplodeTarget(v){ explodeTarget=v; $('explodeBtn').textContent = v>0.5?'Montar piezas':'Separar piezas'; $('explodeBtn').setAttribute('aria-pressed', v>0.5?'true':'false'); }
+$('explodeBtn').addEventListener('click', ()=>setExplodeTarget(explodeTarget>0.5?0:1));
+$('explodeRange').addEventListener('input', e=>{ const v=e.target.value/100; explodeTarget=v; if(VA){VA.eng.state.explode=v; VA.markDirty();} $('explodeVal').textContent=e.target.value+' %'; $('explodeBtn').textContent = v>0.5?'Montar piezas':'Separar piezas'; $('explodeBtn').setAttribute('aria-pressed', v>0.5?'true':'false'); });
+$('spinBtn').addEventListener('click', ()=>{ spinning=!spinning; $('spinBtn').setAttribute('aria-pressed',spinning); $('spinBtn').textContent = spinning?'Parar el cigüeñal':'Girar el cigüeñal'; });
+if(VA){
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let down=null;
+  const cv = VA.renderer.domElement;
+  cv.addEventListener('pointerdown', e=>{ down={x:e.clientX,y:e.clientY}; });
+  cv.addEventListener('pointerup', e=>{
+    if(!down || Math.hypot(e.clientX-down.x,e.clientY-down.y)>6){ down=null; return; } down=null;
+    const r = cv.getBoundingClientRect(); ndc.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
+    ray.setFromCamera(ndc, VA.camera);
+    const hits = ray.intersectObjects(VA.eng.root.children, true).filter(h=>h.object.isMesh && h.object.userData.part);
+    // Prefer solid parts over see-through shells
+    const solid = hits.find(h=>!h.object.material.transparent) || hits[0];
+    selectPart(solid ? solid.object.userData.part : null);
+  });
+}
+
+/* ---------- Section 2: 4-stroke cycle ---------- */
+const PH = ['adm','comp','exp','esc'];
+const PH_NAME = {adm:'Admisión',comp:'Compresión',exp:'Expansión',esc:'Escape'};
+const PH_TEXT = {
+  adm:'1ª vuelta. El pistón baja del PMS al PMI. Entra la carga fresca: mezcla en MEP, solo aire en MEC. En aspiración natural la presión queda algo por debajo de la ambiente.',
+  comp:'1ª vuelta. El pistón sube con las dos válvulas cerradas. Presión y temperatura suben. Al final salta la chispa (MEP) o se inyecta el combustible (MEC).',
+  exp:'2ª vuelta. La combustión empuja el pistón hacia abajo. Es la única carrera que da trabajo: el volumen sube y la presión baja.',
+  esc:'2ª vuelta. El pistón sube y expulsa los gases quemados. En modo real el escape empieza antes, con el AAE (escape espontáneo).'
+};
+const R_CYC = 10, VC = 1, VD = 9, GAM = 1.4, KCOMB = 3;
+const TIM = {aaa:10, rca:40, aae:40, rce:10};
+let cyc = {theta:0, playing:!reduceMotion, mode:'theo', logp:false, speed:2};
+function Vof(th){ const a = (th%360)*Math.PI/180; return VC + VD*dispFrac(a); }
+function phaseOf(th){ return PH[Math.floor((th%720)/180)]; }
+function smooth(t){ t=Math.min(1,Math.max(0,t)); return t*t*(3-2*t); }
+function pTheo(th){
+  const V=Vof(th), V1=VC+VD;
+  if(th<180) return 1;
+  if(th<360) return Math.pow(V1/V,GAM);
+  if(th<540) return KCOMB*Math.pow(V1/V,GAM);
+  return 1;
+}
+const N_POLY=1.33, P_ADM=0.85, P_ESC=1.12;
+const TH_IVC = 180+TIM.rca, TH_EVO = 540-TIM.aae, TH_IGN=345, DUR=60;
+function pReal(th){
+  th = ((th%720)+720)%720;
+  const Vivc = Vof(TH_IVC);
+  if(th < 20) return P_ESC + (P_ADM-P_ESC)*smooth(th/20);
+  if(th < TH_IVC) return P_ADM;
+  const ppoly = P_ADM*Math.pow(Vivc/Vof(th), N_POLY);
+  let xb = 0; if(th>TH_IGN){ const t=(th-TH_IGN)/DUR; xb = 1-Math.exp(-5*Math.pow(Math.min(t,1.6),3)); }
+  const pcomb = ppoly*(1+(KCOMB-1)*xb);
+  if(th < TH_EVO) return pcomb;
+  if(th < 570){ const w=smooth((th-TH_EVO)/(570-TH_EVO)); return pcomb*(1-w)+P_ESC*w; }
+  return P_ESC;
+}
+function liftCurve(th, open, close){ // degrees, may wrap
+  let t = th; if(close>720 && t<close-720) t+=720; if(open<0 && t>open+720) t-=720;
+  if(t<open || t>close) return 0;
+  const u=(t-open)/(close-open); return Math.pow(Math.sin(Math.PI*u),2);
+}
+function valveLifts(th){
+  if(cyc.mode==='theo') return {a:liftCurve(th,0,180), e:liftCurve(th,540,720)};
+  return {a: Math.max(liftCurve(th,-TIM.aaa,TH_IVC), liftCurve(th,720-TIM.aaa,720+TH_IVC)), e: Math.max(liftCurve(th,TH_EVO,720+TIM.rce), liftCurve(th, TH_EVO-720, TIM.rce))};
+}
+
+// p-V SVG
+const pv = $('pvSvg');
+const PV = {x0:58,x1:620,y0:300,y1:24};
+let pvPaths=null, pvDot=null, pvAxisG=null;
+function pvScales(){
+  const Vmax = VC+VD; const pmax = KCOMB*Math.pow(R_CYC,GAM)*1.05;
+  const sx = V => PV.x0 + (V/Vmax)*(PV.x1-PV.x0)*0.96;
+  let sy;
+  if(cyc.logp){ const lo=Math.log(0.6), hi=Math.log(pmax); sy = p => PV.y0 - (Math.log(Math.max(p,0.6))-lo)/(hi-lo)*(PV.y0-PV.y1); }
+  else { sy = p => PV.y0 - (p/pmax)*(PV.y0-PV.y1); }
+  return {sx,sy,pmax,Vmax};
+}
+function drawPV(){
+  pv.innerHTML='';
+  const fg=css('--fg'), mu=css('--muted'), line=css('--line');
+  const {sx,sy,pmax,Vmax} = pvScales();
+  // axes
+  el('line',{x1:PV.x0,y1:PV.y0,x2:PV.x1,y2:PV.y0,stroke:mu,'stroke-width':1.5},pv);
+  el('line',{x1:PV.x0,y1:PV.y0,x2:PV.x0,y2:PV.y1-6,stroke:mu,'stroke-width':1.5},pv);
+  const ticks = cyc.logp ? [1,2,5,10,20,50] : [0,20,40,60,80];
+  for(const t of ticks){ if(t>pmax) continue; const y=sy(t); el('line',{x1:PV.x0-4,y1:y,x2:PV.x1,y2:y,stroke:line,'stroke-width':0.7},pv); const tx=el('text',{x:PV.x0-8,y:y+4,'text-anchor':'end','font-size':11,fill:mu},pv); tx.textContent=t; }
+  const ty=el('text',{x:14,y:PV.y1+6,'font-size':12,fill:mu},pv); ty.textContent='p/p₁';
+  const tv=el('text',{x:PV.x1,y:PV.y0+28,'text-anchor':'end','font-size':12,fill:mu},pv); tv.textContent='Volumen';
+  // Vc / Vd marks
+  const xc=sx(VC), xd=sx(VC+VD);
+  for(const [x,lab] of [[xc,'PMS'],[xd,'PMI']]){ el('line',{x1:x,y1:PV.y0,x2:x,y2:PV.y1,stroke:line,'stroke-dasharray':'3 4'},pv); const t=el('text',{x:x,y:PV.y0+16,'text-anchor':'middle','font-size':11,fill:mu},pv); t.textContent=lab; }
+  const tvc=el('text',{x:(PV.x0+xc)/2,y:PV.y0-6,'text-anchor':'middle','font-size':11,fill:mu},pv); tvc.textContent='V_C';
+  const tvd=el('text',{x:(xc+xd)/2,y:PV.y0+28,'text-anchor':'middle','font-size':11,fill:mu},pv); tvd.textContent='V_D';
+  // curves per phase
+  pvPaths = {};
+  for(const mode of ['theo','real']){
+    const f = mode==='theo'?pTheo:pReal;
+    const active = cyc.mode===mode;
+    for(let k=0;k<4;k++){
+      let d=''; const a0=k*180, a1=k*180+180;
+      for(let th=a0; th<=a1; th+=1){ const t=Math.min(th,719.99); const x=sx(Vof(t)), y=sy(f(t)); d += (th===a0?'M':'L')+x.toFixed(1)+' '+y.toFixed(1); }
+      // vertical jumps for the theoretical cycle
+      if(mode==='theo' && k===1){ d+='L'+sx(VC).toFixed(1)+' '+sy(KCOMB*Math.pow(R_CYC,GAM)).toFixed(1); }
+      if(mode==='theo' && k===2){ d+='L'+sx(VC+VD).toFixed(1)+' '+sy(1).toFixed(1); }
+      el('path',{d, fill:'none', stroke:css('--'+PH[k]), 'stroke-width':active?3:1.3, 'stroke-dasharray':active?'':'5 4', opacity:active?1:0.55, 'stroke-linejoin':'round'},pv);
+    }
+  }
+  // labels from slide 19
+  if(cyc.mode==='real'){
+    const lab=(txt,th,dx,dy)=>{ const x=sx(Vof(th))+dx, y=sy(pReal(th))+dy; const t=el('text',{x,y,'font-size':11,fill:fg},pv); t.textContent=txt; };
+    lab('AE (AAE)',TH_EVO,-30,-10); lab('CA (RCA)',TH_IVC,-10,24); lab('Inicio combustión',TH_IGN,8,0);
+  }
+  pvDot = el('circle',{r:7, fill:fg, stroke:css('--surface'), 'stroke-width':2},pv);
+}
+// distribution SVG
+const ds = $('distSvg');
+let distPtr=null, distCross=null;
+function arcPath(cx,cy,r,a0,a1){ // degrees, 0 = top (PMS), clockwise
+  const p=a=>{ const t=(a-90)*Math.PI/180; return [cx+r*Math.cos(t), cy+r*Math.sin(t)]; };
+  const [x0,y0]=p(a0),[x1,y1]=p(a1); const large=(a1-a0)%360>180?1:0;
+  return 'M'+x0.toFixed(1)+' '+y0.toFixed(1)+' A'+r+' '+r+' 0 '+large+' 1 '+x1.toFixed(1)+' '+y1.toFixed(1);
+}
+function drawDist(){
+  ds.innerHTML='';
+  const cx=120, cy=122, mu=css('--muted'), fg=css('--fg');
+  el('line',{x1:cx,y1:14,x2:cx,y2:230,stroke:mu,'stroke-width':1,'stroke-dasharray':'3 3'},ds);
+  const t1=el('text',{x:cx,y:11,'text-anchor':'middle','font-size':11,fill:fg},ds); t1.textContent='PMS';
+  const t2=el('text',{x:cx,y:239,'text-anchor':'middle','font-size':11,fill:fg},ds); t2.textContent='PMI';
+  const real = cyc.mode==='real';
+  // arcs: angle within the drawing = crank angle mod 360, starting at PMS
+  const segs = real ? [
+    ['adm', 96, -TIM.aaa, 180+TIM.rca],
+    ['comp',80, 180+TIM.rca, 360],
+    ['exp', 64, 0, 180-TIM.aae],
+    ['esc', 48, 180-TIM.aae, 360+TIM.rce]
+  ] : [['adm',96,0,180],['comp',80,180,360],['exp',64,0,180],['esc',48,180,360]];
+  for(const [ph,r,a0,a1] of segs){ el('path',{d:arcPath(cx,cy,r,a0,a1),fill:'none',stroke:css('--'+ph),'stroke-width':7,'stroke-linecap':'butt'},ds); }
+  if(real){
+    distCross = el('path',{d:arcPath(cx,cy,108,-TIM.aaa,TIM.rce),fill:'none',stroke:fg,'stroke-width':3},ds);
+    const tc=el('text',{x:cx+16,y:18,'font-size':10,fill:fg},ds); tc.textContent='cruce';
+  }
+  distPtr = el('line',{x1:cx,y1:cy,x2:cx,y2:cy-104,stroke:fg,'stroke-width':2.5,'stroke-linecap':'round'},ds);
+  el('circle',{cx,cy,r:4,fill:fg},ds);
+}
+const PH_HEX = {adm:0x2a66c9, comp:0x23905a, exp:0xcf3f2a, esc:0xb88a00};
+function updateCycle(){
+  const th = cyc.theta;
+  const ph = phaseOf(th);
+  $('strokeName').textContent = PH_NAME[ph];
+  $('strokeName').style.color = css('--'+ph);
+  $('strokeText').textContent = PH_TEXT[ph];
+  $('roTheta').textContent = Math.floor(th)+'°';
+  $('roTurn').textContent = th<360?'1ª':'2ª';
+  const L = valveLifts(th);
+  $('roVA').textContent = L.a>0.001?'abierta':'cerrada';
+  $('roVE').textContent = L.e>0.001?'abierta':'cerrada';
+  $('thetaRange').value = Math.floor(th); $('thetaVal').textContent = Math.floor(th)+'°';
+  const {sx,sy} = pvScales();
+  const p = cyc.mode==='theo'?pTheo(th):pReal(th);
+  if(pvDot){ pvDot.setAttribute('cx', sx(Vof(th))); pvDot.setAttribute('cy', sy(p)); }
+  if(distPtr){ const a=(th%360-90)*Math.PI/180; distPtr.setAttribute('x2', 120+104*Math.cos(a)); distPtr.setAttribute('y2', 122+104*Math.sin(a)); }
+  if(VB){
+    const s=VB.eng.state; s.alpha = (th%360)*Math.PI/180; s.liftA = 0.12*L.a; s.liftE=0.12*L.e;
+    // cam lobes: nose down at mid opening; cams turn at half crank speed
+    const half = th/2*Math.PI/180;
+    s.camA = half - (cyc.mode==='theo'?45:52.5)*Math.PI/180; s.camE = half - (cyc.mode==='theo'?315:(TH_EVO+730)/4)*Math.PI/180;
+    // gas colour: fresh charge while intake open / compression, burnt after ignition
+    let col = PH_HEX[ph];
+    if(cyc.mode==='real' && th>TH_IGN && th<360) col = PH_HEX.exp;
+    s.gasColor = col;
+    const ign = cyc.mode==='theo'?360:TH_IGN;
+    const dt = th-ign; s.spark = (dt>=-2 && dt<18) ? (1-Math.max(0,dt)/18) : 0;
+    VB.markDirty();
+  }
+}
+function setMode(m){ cyc.mode=m; $('modeTheo').setAttribute('aria-pressed',m==='theo'); $('modeReal').setAttribute('aria-pressed',m==='real'); drawPV(); drawDist(); updateCycle(); }
+$('modeTheo').addEventListener('click',()=>setMode('theo'));
+$('modeReal').addEventListener('click',()=>setMode('real'));
+$('logBtn').addEventListener('click',()=>{ cyc.logp=!cyc.logp; $('logBtn').setAttribute('aria-pressed',cyc.logp); $('logBtn').textContent = cyc.logp?'Ver escala normal':'Ver zona de baja presión'; drawPV(); updateCycle(); });
+function setPlaying(v){ cyc.playing=v; $('playBtn').setAttribute('aria-pressed',v); $('playBtn').textContent=v?'Pausa':'Reproducir'; }
+$('playBtn').addEventListener('click',()=>setPlaying(!cyc.playing));
+$('thetaRange').addEventListener('input',e=>{ setPlaying(false); cyc.theta=+e.target.value; updateCycle(); });
+const SPEEDS=[0.5,1,2,4];
+$('speedRange').addEventListener('input',e=>{ cyc.speed=+e.target.value; $('speedVal').textContent = String(SPEEDS[cyc.speed-1]).replace('.',',')+'×'; });
+$('speedVal').textContent='1×';
+setPlaying(cyc.playing);
+
+/* ---------- Section 3: crank-slider ---------- */
+const bm=$('bmSvg'), bmp=$('bmPlot');
+function drawBM(){
+  const a = $('alphaRange').value*Math.PI/180, lam = $('lambdaRange').value/100;
+  $('alphaVal').textContent = $('alphaRange').value+'°'; $('lambdaVal').textContent = fmt(lam);
+  const fg=css('--fg'), mu=css('--muted'), acc=css('--accent'), line=css('--line');
+  bm.innerHTML='';
+  const R=55, L=R/lam, cx=130, cy=280;
+  const Ls = Math.min(L, 200); const scale = Ls/L; // keep it inside the box for small λ
+  const Rd=R*scale, Ld=Ls;
+  const cpx=cx+Rd*Math.sin(a), cpy=cy-Rd*Math.cos(a);
+  const py = cy - (Rd*Math.cos(a) + Math.sqrt(Ld*Ld - Math.pow(Rd*Math.sin(a),2)));
+  const pms = cy-(Rd+Ld), pmi = cy-(Ld-Rd);
+  el('circle',{cx,cy,r:Rd,fill:'none',stroke:line,'stroke-width':1.5,'stroke-dasharray':'4 4'},bm);
+  el('rect',{x:cx-34,y:pms-40,width:68,height:(pmi-pms)+60,fill:'none',stroke:line,'stroke-width':1.5},bm);
+  for(const [y,t] of [[pms,'PMS'],[pmi,'PMI']]){ el('line',{x1:cx-46,y1:y,x2:cx+46,y2:y,stroke:mu,'stroke-dasharray':'3 3'},bm); const tx=el('text',{x:cx+50,y:y+4,'font-size':11,fill:mu},bm); tx.textContent=t; }
+  el('rect',{x:cx-30,y:py-30,width:60,height:40,rx:4,fill:css('--surface-2'),stroke:fg,'stroke-width':1.5},bm);
+  el('line',{x1:cpx,y1:cpy,x2:cx,y2:py,stroke:acc,'stroke-width':6,'stroke-linecap':'round'},bm);
+  el('line',{x1:cx,y1:cy,x2:cpx,y2:cpy,stroke:fg,'stroke-width':7,'stroke-linecap':'round'},bm);
+  el('circle',{cx,cy,r:6,fill:fg},bm); el('circle',{cx:cpx,cy:cpy,r:5,fill:css('--surface'),stroke:fg,'stroke-width':2},bm); el('circle',{cx,cy:py,r:5,fill:css('--surface'),stroke:acc,'stroke-width':2},bm);
+  const tl=el('text',{x:(cpx+cx)/2+8,y:(cpy+py)/2,'font-size':12,fill:acc},bm); tl.textContent='L';
+  const tr=el('text',{x:(cx+cpx)/2-14,y:(cy+cpy)/2-4,'font-size':12,fill:fg},bm); tr.textContent='R';
+  // s(α) bracket
+  el('line',{x1:cx-48,y1:pms,x2:cx-48,y2:pms+(py-pms+ (py-pms>0?0:0)),stroke:css('--exp'),'stroke-width':3},bm);
+  const ts=el('text',{x:cx-54,y:(pms+py)/2+4,'text-anchor':'end','font-size':12,fill:css('--exp')},bm); ts.textContent='s(α)';
+  // plot
+  bmp.innerHTML='';
+  const X0=40,X1=348,Y0=230,Y1=20, ymax=1.5;
+  const sxp=d=>X0+(d/360)*(X1-X0), syp=v=>(Y0+Y1)/2 - v/ymax*((Y0-Y1)/2);
+  el('line',{x1:X0,y1:syp(0),x2:X1,y2:syp(0),stroke:mu},bmp);
+  el('line',{x1:X0,y1:Y0,x2:X0,y2:Y1,stroke:mu},bmp);
+  for(const v of [-1,1]){ const y=syp(v); el('line',{x1:X0,y1:y,x2:X1,y2:y,stroke:line,'stroke-dasharray':'3 4'},bmp); const t=el('text',{x:X0-6,y:y+4,'text-anchor':'end','font-size':11,fill:mu},bmp); t.textContent=v; }
+  for(const d of [0,90,180,270,360]){ const t=el('text',{x:sxp(d),y:Y0+16,'text-anchor':'middle','font-size':11,fill:mu},bmp); t.textContent=d+'°'; }
+  const cmLine = 2/Math.PI; // c_m/(ωR) = 2Sn/(ωR) = 2·2R·n/(2πn·R) = 2/π
+  el('line',{x1:X0,y1:syp(cmLine),x2:X1,y2:syp(cmLine),stroke:css('--comp'),'stroke-width':1.5,'stroke-dasharray':'6 4'},bmp);
+  const tcm=el('text',{x:X1,y:syp(cmLine)-6,'text-anchor':'end','font-size':11,fill:css('--comp')},bmp); tcm.textContent='c_m';
+  let d1='',d0='';
+  for(let d=0; d<=360; d+=2){ const r=d*Math.PI/180; d1+=(d?'L':'M')+sxp(d).toFixed(1)+' '+syp(Math.sin(r)+lam/2*Math.sin(2*r)).toFixed(1); d0+=(d?'L':'M')+sxp(d).toFixed(1)+' '+syp(Math.sin(r)).toFixed(1); }
+  el('path',{d:d0,fill:'none',stroke:mu,'stroke-width':1.2,'stroke-dasharray':'4 4'},bmp);
+  el('path',{d:d1,fill:'none',stroke:acc,'stroke-width':2.5},bmp);
+  const cv = Math.sin(a)+lam/2*Math.sin(2*a);
+  el('circle',{cx:sxp(+$('alphaRange').value),cy:syp(cv),r:6,fill:acc,stroke:css('--surface'),'stroke-width':2},bmp);
+  const lg=el('text',{x:X0+6,y:Y1+12,'font-size':11,fill:acc},bmp); lg.textContent='c/(ωR) con λ';
+  const lg2=el('text',{x:X0+6,y:Y1+26,'font-size':11,fill:mu},bmp); lg2.textContent='sin α (biela infinita)';
+  const sfrac = (1-Math.cos(a) + (1/lam)*(1-Math.sqrt(1-lam*lam*Math.sin(a)**2)))/2;
+  $('bmS').textContent = fmt(sfrac); $('bmC').textContent = fmt(cv); $('bmCm').textContent = fmt(cv/cmLine);
+}
+$('alphaRange').addEventListener('input',drawBM); $('lambdaRange').addEventListener('input',drawBM);
+
+/* ---------- Section 4: theoretical cycles ---------- */
+let cycType='otto';
+const cs=$('cycSvg'), es=$('etaSvg');
+function etaOf(type,r,g,al,be){
+  const base = 1/Math.pow(r,g-1);
+  if(type==='otto') return 1-base;
+  if(type==='diesel') return 1-base*(Math.pow(be,g)-1)/(g*(be-1));
+  return 1-base*(al*Math.pow(be,g)-1)/((al-1)+g*al*(be-1));
+}
+function drawCycles(){
+  const r=+$('rRange').value, g=+$('gRange').value, al=+$('aRange').value, be=+$('bRange').value;
+  $('rVal').textContent=fmt(r,1).replace(',0',''); $('gVal').textContent=fmt(g); $('aVal').textContent=fmt(al,1); $('bVal').textContent=fmt(be);
+  $('aLbl').hidden = cycType==='diesel'; $('bLbl').hidden = cycType==='otto';
+  const fg=css('--fg'), mu=css('--muted'), acc=css('--accent'), line=css('--line');
+  // states (v normalized by v2 = 1, p1 = 1)
+  const v1=r, p2=Math.pow(r,g);
+  let pts=[], pmax, label=[];
+  const poly=(va,pa,vb,n=40)=>{ const out=[]; for(let i=0;i<=n;i++){ const v=va+(vb-va)*i/n; out.push([v, pa*Math.pow(va/v,g)]); } return out; };
+  if(cycType==='otto'){ const p3=al*p2; pts=[...poly(v1,1,1),[1,p3],...poly(1,p3,v1)]; pmax=p3; label=[['1',v1,1],['2',1,p2],['3',1,p3],['4',v1,p3/Math.pow(r,g)]]; }
+  else if(cycType==='diesel'){ const v3=be; pts=[...poly(v1,1,1),[v3,p2],...poly(v3,p2,v1)]; pmax=p2; label=[['1',v1,1],['2',1,p2],['3',v3,p2],['4',v1,p2*Math.pow(v3/v1,g)]]; }
+  else { const p3=al*p2, v3=be; pts=[...poly(v1,1,1),[1,p3],[v3,p3],...poly(v3,p3,v1)]; pmax=p3; label=[['1',v1,1],['2',1,p2],['3',1,p3],['3A',v3,p3],['4',v1,p3*Math.pow(v3/v1,g)]]; }
+  pts.push([v1,1]);
+  cs.innerHTML='';
+  const X0=44,X1=344,Y0=250,Y1=20;
+  const sx=v=>X0+(v/(v1*1.05))*(X1-X0), sy=p=>Y0-(p/(pmax*1.1))*(Y0-Y1);
+  el('line',{x1:X0,y1:Y0,x2:X1,y2:Y0,stroke:mu},cs); el('line',{x1:X0,y1:Y0,x2:X0,y2:Y1,stroke:mu},cs);
+  const tp=el('text',{x:X0+4,y:Y1+4,'font-size':12,fill:mu},cs); tp.textContent='p';
+  const tv=el('text',{x:X1,y:Y0+18,'text-anchor':'end','font-size':12,fill:mu},cs); tv.textContent='v';
+  let d=''; pts.forEach((p,i)=>{ d+=(i?'L':'M')+sx(p[0]).toFixed(1)+' '+sy(p[1]).toFixed(1); });
+  el('path',{d:d+'Z',fill:acc,'fill-opacity':0.12,stroke:acc,'stroke-width':2.5,'stroke-linejoin':'round'},cs);
+  for(const [t,v,p] of label){ el('circle',{cx:sx(v),cy:sy(p),r:3.5,fill:fg},cs); const tx=el('text',{x:sx(v)+6,y:sy(p)-6,'font-size':12,fill:fg},cs); tx.textContent=t; }
+  const qa=el('text',{x:sx(1)+40,y:sy(pmax)+4,'font-size':11,fill:css('--exp')},cs); qa.textContent='← q_ap';
+  const qc=el('text',{x:sx(v1)-14,y:sy(1)+16,'text-anchor':'end','font-size':11,fill:css('--adm')},cs); qc.textContent='q_ced →';
+  const eta=etaOf(cycType,r,g,al,be);
+  $('etaOut').textContent = fmt(eta*100,1)+' %'; $('p2Out').textContent = fmt(p2,1); $('pmOut').textContent = fmt(pmax,1);
+  $('cycFormula').innerHTML = cycType==='otto' ? 'η = 1 − 1/r<sup>γ−1</sup>' : cycType==='diesel' ? 'η = 1 − (1/r<sup>γ−1</sup>)·(β<sup>γ</sup> − 1)/(γ(β − 1)) &nbsp;·&nbsp; β = v₃/v₂' : 'η = 1 − (1/r<sup>γ−1</sup>)·(αβ<sup>γ</sup> − 1)/(α − 1 + γα(β − 1)) &nbsp;·&nbsp; α = p₃/p₂, β = v₃A/v₂';
+  // eta vs r
+  es.innerHTML='';
+  const ex=rr=>X0+((rr-4)/(22-4))*(X1-X0), ey=e=>Y0-(e/0.8)*(Y0-Y1);
+  el('line',{x1:X0,y1:Y0,x2:X1,y2:Y0,stroke:mu},es); el('line',{x1:X0,y1:Y0,x2:X0,y2:Y1,stroke:mu},es);
+  for(const e of [0.2,0.4,0.6]){ const y=ey(e); el('line',{x1:X0,y1:y,x2:X1,y2:y,stroke:line,'stroke-dasharray':'3 4'},es); const t=el('text',{x:X0-6,y:y+4,'text-anchor':'end','font-size':11,fill:mu},es); t.textContent=fmt(e,1); }
+  for(const rr of [5,10,15,20]){ const t=el('text',{x:ex(rr),y:Y0+16,'text-anchor':'middle','font-size':11,fill:mu},es); t.textContent=rr; }
+  const tr=el('text',{x:X1,y:Y0-6,'text-anchor':'end','font-size':11,fill:mu},es); tr.textContent='r';
+  const te=el('text',{x:X0+4,y:Y1+4,'font-size':12,fill:mu},es); te.textContent='η';
+  // MEP / MEC r bands
+  el('rect',{x:ex(9),y:Y1,width:ex(11)-ex(9),height:Y0-Y1,fill:css('--adm'),opacity:0.1},es);
+  el('rect',{x:ex(15),y:Y1,width:ex(18)-ex(15),height:Y0-Y1,fill:css('--exp'),opacity:0.1},es);
+  const tb1=el('text',{x:ex(10),y:Y0-8,'text-anchor':'middle','font-size':10,fill:mu},es); tb1.textContent='MEP';
+  const tb2=el('text',{x:ex(16.5),y:Y0-8,'text-anchor':'middle','font-size':10,fill:mu},es); tb2.textContent='MEC';
+  const series=[['otto',css('--adm'),'Otto'],['diesel',css('--exp'),'Diesel'],['pl',css('--comp'),'P. limitada']];
+  series.forEach(([t,c,n],i)=>{ let dd=''; for(let rr=4; rr<=22; rr+=0.25){ dd+=(rr===4?'M':'L')+ex(rr).toFixed(1)+' '+ey(etaOf(t,rr,g,al,be)).toFixed(1); } el('path',{d:dd,fill:'none',stroke:c,'stroke-width':t===cycType?3:1.4,opacity:t===cycType?1:0.6},es); const lt=el('text',{x:X0+8,y:Y1+14+i*14,'font-size':11,fill:c},es); lt.textContent=n; });
+  el('circle',{cx:ex(r),cy:ey(eta),r:6,fill:acc,stroke:css('--surface'),'stroke-width':2},es);
+}
+document.querySelectorAll('.cyc').forEach(b=>b.addEventListener('click',()=>{ cycType=b.dataset.c; document.querySelectorAll('.cyc').forEach(x=>x.setAttribute('aria-pressed',x===b)); drawCycles(); }));
+for(const id of ['rRange','gRange','aRange','bRange']) $(id).addEventListener('input',drawCycles);
+
+/* ---------- Section 5: energy balance ---------- */
+const BAL = [
+  ['Pe','Potencia efectiva',30,40,'--accent'],
+  ['Paux','Auxiliares',2,4,'--own'],
+  ['Qrefr','Refrigeración',25,35,'--adm'],
+  ['Qa','Aceite',6,10,'--comp'],
+  ['Qconv','Paredes (conv. + rad.)',5,8,'--muted'],
+  ['Qge','Gases de escape',20,35,'--exp'],
+  ['Qres','Combustión incompleta',1,4,'--esc']
+];
+function drawBal(){
+  const s=$('balSvg'); s.innerHTML='';
+  const tot = BAL.reduce((a,b)=>a+(b[2]+b[3])/2,0);
+  let x=10; const W=620, y=40, h=56;
+  const t0=el('text',{x:10,y:24,'font-size':12,fill:css('--muted')},s); t0.textContent='mf·Hc = 100 % (medias del rango, escaladas)';
+  BAL.forEach((b,i)=>{
+    const w=((b[2]+b[3])/2)/tot*W;
+    const r=el('rect',{x,y,width:Math.max(w-2,1),height:h,fill:css(b[4]),rx:3,tabindex:0,role:'button','aria-label':b[1]},s);
+    r.style.cursor='pointer';
+    const show=()=>{ $('balInfo').innerHTML='<b>'+b[1]+' ('+b[0]+')</b>: '+b[2]+'-'+b[3]+' % de ṁf·Hc.'+(b[0]==='Qge'?' Es el calor que aprovecha la cogeneración y el turbo.':'')+(b[0]==='Qrefr'?' En cogeneración también se recupera (agua de cilindros).':''); };
+    r.addEventListener('click',show); r.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); show(); } });
+    if(w>44){ const t=el('text',{x:x+w/2,y:y+h/2+5,'text-anchor':'middle','font-size':12,fill:css('--surface'),'pointer-events':'none'},s); t.textContent=b[0]; }
+    const tl=el('text',{x:x+w/2,y:y+h+(i%2?34:18),'text-anchor':'middle','font-size':11,fill:css('--fg'),'pointer-events':'none'},s); tl.textContent=b[2]+'-'+b[3]+'%';
+    x+=w;
+  });
+}
+
+/* ---------- Section 6: T1 ---------- */
+document.querySelectorAll('.tmap').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('.tmap').forEach(x=>x.setAttribute('aria-pressed',x===b)); $('mapMaq').hidden = b.dataset.m!=='maq'; $('mapMot').hidden = b.dataset.m!=='mot'; }));
+function drawEtaBars(){
+  const s=$('etaBars'); s.innerHTML='';
+  const rows=[['MCIA',20,52,'T1 diap. 26, 40'],['Turbina de gas',25,40,'T1 diap. 23, 40'],['Turbina de vapor',35,45,'T1 diap. 21, 40'],['Ciclo combinado',48,63,'T1 diap. 25, 40']];
+  const X0=150,X1=620, sx=v=>X0+(v/70)*(X1-X0), mu=css('--muted'), fg=css('--fg');
+  for(const v of [0,10,20,30,40,50,60,70]){ el('line',{x1:sx(v),y1:10,x2:sx(v),y2:190,stroke:css('--line'),'stroke-dasharray':'3 4'},s); const t=el('text',{x:sx(v),y:208,'text-anchor':'middle','font-size':11,fill:mu},s); t.textContent=v+'%'; }
+  rows.forEach(([n,a,b],i)=>{ const y=22+i*44; const t=el('text',{x:X0-10,y:y+16,'text-anchor':'end','font-size':13,fill:fg},s); t.textContent=n; el('rect',{x:sx(a),y,width:sx(b)-sx(a),height:24,rx:3,fill:css('--accent')},s); const tv=el('text',{x:sx(b)+6,y:y+16,'font-size':12,fill:fg},s); tv.textContent=a+'-'+b+' %'; });
+  const tt=el('text',{x:X0,y:226,'font-size':11,fill:mu},s); tt.textContent='Rendimiento (resumen T1 diap. 40)';
+}
+function cogen(){
+  const We=+$('cgWe').value, Qu=+$('cgQu').value, er=$('cgEr').value/100;
+  $('cgWeV').textContent=We; $('cgQuV').textContent=Qu; $('cgErV').textContent=fmt(er);
+  const tot=We+Qu; $('cgG').textContent = tot>100 ? 'imposible (> 100 %)' : fmt(tot,0)+' %';
+  const den = 100 - Qu/er; $('cgR').textContent = (den<=0||tot>100) ? '-' : fmt(We/den*100,1)+' %';
+}
+for(const id of ['cgWe','cgQu','cgEr']) $(id).addEventListener('input',cogen);
+function dosado(){
+  const x=+$('dx').value, y=+$('dy').value, fr=$('dfr').value/100;
+  $('dxV').textContent=x; $('dyV').textContent=y; $('dfrV').textContent=fmt(fr);
+  const a=x+y/4, fe=(12*x+y)/(137.28*a);
+  $('doFe').textContent=fmt(fe,4); $('doAf').textContent=fmt(1/fe,1); $('doL').textContent=fmt(1/fr);
+  $('doT').textContent = Math.abs(fr-1)<0.005 ? 'estequiométrica' : (fr<1?'pobre (sobra aire)':'rica (sobra comb.)');
+  $('doCO2').textContent = fmt(44/(12+y/x));
+  const s=$('dosSvg'); s.innerHTML='';
+  const X0=20,X1=620, sx=v=>X0+((v-0.4)/(1.6-0.4))*(X1-X0), mu=css('--muted'), fg=css('--fg');
+  el('rect',{x:X0,y:30,width:sx(1)-X0,height:18,fill:css('--adm'),opacity:0.35},s);
+  el('rect',{x:sx(1),y:30,width:X1-sx(1),height:18,fill:css('--exp'),opacity:0.35},s);
+  const tp=el('text',{x:X0+4,y:22,'font-size':11,fill:mu},s); tp.textContent='pobre: FR < 1, λ > 1';
+  const tr=el('text',{x:X1-4,y:22,'text-anchor':'end','font-size':11,fill:mu},s); tr.textContent='rica: FR > 1, λ < 1';
+  for(const v of [0.4,0.6,0.8,1,1.2,1.4,1.6]){ const t=el('text',{x:sx(v),y:66,'text-anchor':'middle','font-size':11,fill:mu},s); t.textContent=fmt(v,1); }
+  el('line',{x1:sx(0.9),y1:26,x2:sx(0.9),y2:52,stroke:css('--exp'),'stroke-width':2,'stroke-dasharray':'3 2'},s);
+  const tn=el('text',{x:sx(0.9),y:84,'text-anchor':'middle','font-size':11,fill:css('--exp')},s); tn.textContent='NOx máx.';
+  el('rect',{x:sx(0.8),y:50,width:sx(1.15)-sx(0.8),height:4,fill:css('--comp')},s);
+  el('polygon',{points:(sx(fr)-7)+',26 '+(sx(fr)+7)+',26 '+sx(fr)+',38',fill:fg},s);
+  el('line',{x1:sx(fr),y1:26,x2:sx(fr),y2:52,stroke:fg,'stroke-width':2},s);
+}
+for(const id of ['dx','dy','dfr']) $(id).addEventListener('input',dosado);
+
+/* ---------- Section 7: quiz ---------- */
+const QUIZ = [
+  {q:'Durante la combustión en un MEC, la mezcla aire y combustible es:',o:['Muy heterogénea','Homogénea','Estratificada'],a:0,why:'En el MEC entra solo aire y el combustible se inyecta al final de la compresión: el dosado local es muy heterogéneo.',src:'Wuolah fila 4 · T2 diap. 16'},
+  {q:'¿Cuál podría ser, con mayor probabilidad, la relación de compresión volumétrica de un MEC?',o:['10:1','16:1','6:1'],a:1,why:'MEC: r = 15-18. MEP: r = 9-11.',src:'Wuolah fila 4 · T2 diap. 45'},
+  {q:'Si la pme de un MEP en el régimen de par máximo vale 12 bar, ¿qué valor es posible en el régimen de potencia máxima?',o:['12 bar','15 bar','9 bar'],a:2,why:'La pme es proporcional al par (en 4T, pme = 4π·Me/V_T). En el régimen de potencia máxima el par es menor que el máximo.',src:'Wuolah fila 4 · T2 diap. 48, 51'},
+  {q:'El frente de llama subsónico que recorre la cámara de combustión ocurre en:',o:['MEC turbosobrealimentados','MEP con carga homogénea','MEP con carga estratificada','MEC de inyección directa'],a:1,why:'En el MEP, tras la chispa, un frente de llama recorre la cámara: deflagración subsónica.',src:'Wuolah fila 4 · T2 diap. 13'},
+  {q:'El picado (knocking) de un MEP se debe a:',o:['Carbonilla o partículas incandescentes en las paredes','El autoencendido de la mezcla delante del frente de llama','El apagado del frente de llama en la expansión'],a:1,why:'La parte final de la mezcla sin quemar se autoinflama. El gradiente de presión crea una onda de choque.',src:'Wuolah fila 4 · T2 diap. 15'},
+  {q:'¿En qué motor usarías un e-fuel volátil con alta resistencia a la autoinflamación?',o:['MEP','MEC'],a:0,why:'Alta resistencia a la autoinflamación = alto nº de octano: evita el picado del MEP.',src:'Wuolah fila 4 · T2 diap. 13, 15'},
+  {q:'¿En qué tiempos se produce el cruce de válvulas?',o:['Después de la compresión','Después de la expansión','Al final del escape y principio de la admisión'],a:2,why:'Con AAA y RCE las dos válvulas están abiertas cerca del PMS entre escape y admisión. Mira el arco negro «cruce» en el diagrama de distribución real.',src:'Wuolah fila 3, preg. 263 · T2 diap. 19'},
+  {q:'¿Cómo se comportan la presión y el volumen en el tiempo de expansión?',o:['El volumen y la presión aumentan','El volumen aumenta y la presión disminuye','El volumen disminuye y la presión aumenta'],a:1,why:'El pistón baja: V sube y p baja. Es la curva roja del diagrama p-V.',src:'Wuolah fila 3, preg. 231 · T2 diap. 18-19'},
+  {q:'La parte de la biela unida a la muñequilla del cigüeñal se llama:',o:['Pie','Cabeza','Cuerpo'],a:1,why:'Cabeza en la muñequilla, pie en el bulón. Míralo en el despiece 3D.',src:'Wuolah fila 3, preg. 100 · T2 diap. 8'},
+  {q:'Un sistema que recibe calor de una fuente y da potencia mecánica por un eje es:',o:['Una máquina térmica motora','Una máquina térmica generadora','Un motor térmico','Un generador térmico'],a:2,why:'El motor térmico obtiene energía mecánica a partir de un estado térmico (combustión, nuclear, solar o un intercambiador).',src:'Wuolah fila 4 · T1 diap. 6'},
+  {q:'Para elevar la energía térmica de una corriente de fluido compresible hace falta:',o:['Una máquina térmica generadora, como un turbocompresor movido por un motor eléctrico','Ninguna respuesta es correcta','Una máquina térmica motora que absorbe potencia por el eje','Un motor térmico'],a:0,why:'Generadoras (compresores): el fluido aumenta su estado térmico y piden energía mecánica.',src:'Wuolah fila 4 · T1 diap. 10'},
+  {q:'¿Por qué no está extendido el uso de la turbina de gas en automoción?',o:['Por su baja potencia específica','Por su baja fiabilidad mecánica','Por su bajo rendimiento en funcionamiento variable'],a:2,why:'La TG tiene altas pérdidas a cargas parciales. El MCIA tiene pérdidas mínimas.',src:'Wuolah fila 4 · T1 diap. 23, 26'},
+  {q:'En un ciclo combinado de turbina de gas y turbina de vapor:',o:['El rendimiento puede pasar del 60 % en los mejores diseños','Las otras dos respuestas son correctas','La caldera de recuperación usa el calor del escape de la TG para producir vapor'],a:1,why:'Rendimiento hasta 63 %; la caldera de recuperación alimenta el motor de combustión externa con el escape del MCI.',src:'Wuolah fila 4 · T1 diap. 25, 42'}
+];
+let answered = {};
+function renderQuiz(){
+  const host=$('quiz'); host.innerHTML=''; answered={};
+  QUIZ.forEach((it,i)=>{
+    const box=document.createElement('div'); box.className='q';
+    const h=document.createElement('p'); h.innerHTML='<b>'+(i+1)+'.</b> '+it.q; box.appendChild(h);
+    const opts=document.createElement('div'); opts.className='opts';
+    const why=document.createElement('p'); why.className='why'; why.hidden=true;
+    it.o.forEach((t,j)=>{ const b=document.createElement('button'); b.type='button'; b.textContent=String.fromCharCode(97+j)+') '+t;
+      b.addEventListener('click',()=>{ if(answered[i]!==undefined) return; answered[i]=j===it.a; b.classList.add(j===it.a?'right':'wrong'); if(j!==it.a) opts.children[it.a].classList.add('right'); [...opts.children].forEach(x=>x.disabled=true); why.hidden=false; why.innerHTML=it.why+' <span class="src">('+it.src+')</span>'; score(); });
+      opts.appendChild(b); });
+    box.appendChild(opts); box.appendChild(why); host.appendChild(box);
+  });
+  score();
+}
+function score(){ const n=Object.keys(answered).length, ok=Object.values(answered).filter(Boolean).length; $('score').textContent = ok+' bien de '+n+' respondidas · '+QUIZ.length+' preguntas'; }
+$('resetQuiz').addEventListener('click',renderQuiz);
+
+/* ---------- draw all + loop ---------- */
+function redrawAll(){ drawPV(); drawDist(); updateCycle(); drawBM(); drawCycles(); drawBal(); drawEtaBars(); dosado(); cogen(); }
+redrawAll(); renderQuiz();
+if(window.matchMedia){ const mq=matchMedia('(prefers-color-scheme: dark)'); (mq.addEventListener?mq.addEventListener('change',redrawAll):mq.addListener(redrawAll)); }
+new MutationObserver(redrawAll).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  if(VA){
+    const s=VA.eng.state;
+    const ex = s.explode + (explodeTarget - s.explode)*Math.min(1,dt*5);
+    if(Math.abs(ex-s.explode)>0.0005){
+      // zoom out and re-aim while the parts separate, keep the viewer's direction
+      const c=VA.controls, cam=VA.camera, k0=1+0.75*s.explode, k1=1+0.75*ex;
+      const dir=cam.position.clone().sub(c.target); const dist=dir.length()/k0*k1;
+      c.target.y = 0.9 + 1.1*ex; cam.position.copy(c.target).add(dir.normalize().multiplyScalar(dist));
+      s.explode=ex; $('explodeRange').value=Math.round(ex*100); $('explodeVal').textContent=Math.round(ex*100)+' %'; VA.markDirty(); }
+    if(spinning && VA.isVisible()){ s.alpha=(s.alpha+dt*2)%(2*Math.PI); VA.markDirty(); }
+    VA.frame();
+  }
+  if(cyc.playing && (!VB || VB.isVisible())){ cyc.theta=(cyc.theta + dt*90*SPEEDS[cyc.speed-1])%720; updateCycle(); }
+  if(VB) VB.frame();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+})();
+</script>

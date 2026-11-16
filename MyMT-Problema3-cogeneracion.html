@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head><meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MyMT · Problema 3 · Cogeneración</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1c2330;--mu:#5b6573;--card:#fff;--bd:#d9dde3;--ac:#1f6f5c;--w:#2f8f7b;--h:#e08a3c;--l:#b9c0ca;--k:#f0f4f2}
+@media (prefers-color-scheme:dark){:root{--bg:#161a20;--fg:#e6e9ee;--mu:#9aa4b2;--card:#1e242c;--bd:#323a46;--ac:#6fcfb6;--w:#3aa58f;--h:#d0803a;--l:#59626f;--k:#222b30}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,Segoe UI,sans-serif}
+main{max-width:860px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:.2em 0}
+h2{font-size:1.1rem;margin:1.6em 0 .4em;color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin:10px 0}
+.enun{border-left:4px solid var(--ac)}
+.step{display:grid;grid-template-columns:2.2rem 1fr;gap:8px;margin:12px 0}
+.n{width:2rem;height:2rem;border-radius:50%;background:var(--ac);color:var(--bg);display:grid;place-items:center;font-weight:700}
+.f{background:var(--k);border-radius:6px;padding:6px 10px;margin:4px 0;font-family:Cambria Math,Cambria,serif;font-size:1.05rem;overflow-x:auto}
+.r{font-weight:700;color:var(--ac)}
+.mu{color:var(--mu);font-size:.92rem}
+.pg{color:var(--mu);font-size:.8em}
+table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--bd);padding:4px 6px;text-align:left}
+svg{width:100%;height:auto}
+.tr{background:var(--k);border-left:4px solid var(--h);padding:8px 12px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<h1>Problema 3 · Cogeneración con un MEP de gas natural</h1>
+<p class="mu">Máquinas y Motores Térmicos · problema de clase MCIA v2.1 · resolución completa, apartado por apartado.</p>
+
+<div class="card enun">
+<b>Enunciado.</b> MEP (motor de encendido provocado) de gas natural, potencia efectiva 1000 kW. Rendimiento efectivo 37 %. Calor útil: (i) intercambiador agua-agua con la refrigeración: 450 kW térmicos; (ii) recuperador de los gases de escape, que salen a 500 °C.<br>
+Se pide: a) rendimiento global de cogeneración; b) rendimiento eléctrico equivalente.<br>
+<span class="mu">Hipótesis: catalizador de tres vías; rendimiento de referencia de caldera 90 %; intercambiadores adiabáticos; los gases se enfrían hasta 10 °C sobre T<sub>amb</sub>. Aire (gases): T<sub>amb</sub> = 15 °C, c<sub>p</sub> = 1 kJ/kgK. Gas natural: F<sub>e</sub> = 1/17,4; PCI = 40 000 kJ/kg.</span>
+</div>
+
+<h2>Idea en una frase</h2>
+<div class="card">El motor solo convierte en electricidad el 37 % del combustible. En cogeneración se recupera parte del calor que sobra (agua y gases) y se usa en procesos. Los dos rendimientos miden cuánto del combustible se aprovecha.</div>
+
+<h2>Datos en unidades coherentes</h2>
+<div class="card"><table>
+<tr><td>Potencia efectiva</td><td>P<sub>e</sub> = 1000 kW</td></tr>
+<tr><td>Rendimiento efectivo</td><td>η<sub>e</sub> = 0,37</td></tr>
+<tr><td>Calor de refrigeración útil</td><td>Q<sub>refr</sub> = 450 kW</td></tr>
+<tr><td>Temperaturas de los gases</td><td>T<sub>ge</sub> = 500 °C; salida del recuperador = 15 + 10 = 25 °C</td></tr>
+<tr><td>Dosado estequiométrico</td><td>F<sub>e</sub> = 1/17,4 (aire = 17,4 · combustible)</td></tr>
+<tr><td>PCI</td><td>H<sub>c</sub> = 40 000 kJ/kg</td></tr>
+</table></div>
+
+<h2>Apartado a) Rendimiento global de cogeneración</h2>
+<div class="f" style="font-size:1.1rem">η<sub>global</sub> = (P<sub>e</sub> + Q<sub>útil</sub>) / (ṁ<sub>f</sub>·H<sub>c</sub>) = energía útil / energía del combustible</div>
+
+<div class="step"><div class="n">1</div><div><b>Potencia del combustible.</b> De η<sub>e</sub> = P<sub>e</sub> / (ṁ<sub>f</sub>·H<sub>c</sub>):
+<div class="f">ṁ<sub>f</sub>·H<sub>c</sub> = P<sub>e</sub> / η<sub>e</sub> = 1000 / 0,37 = <span class="r">2702,7 kW</span></div></div></div>
+
+<div class="step"><div class="n">2</div><div><b>Caudal de combustible.</b>
+<div class="f">ṁ<sub>f</sub> = 2702,7 kW / 40 000 kJ/kg = <span class="r">0,06757 kg/s</span></div></div></div>
+
+<div class="step"><div class="n">3</div><div><b>Caudal de aire.</b> Con catalizador de tres vías la mezcla es estequiométrica (F = F<sub>e</sub>), así que el aire es 17,4 veces el combustible:
+<div class="f">ṁ<sub>a</sub> = 17,4 · 0,06757 = <span class="r">1,1757 kg/s</span></div></div></div>
+
+<div class="step"><div class="n">4</div><div><b>Caudal de gases de escape.</b> La masa se conserva: gases = aire + combustible.
+<div class="f">ṁ<sub>ge</sub> = 1,1757 + 0,06757 = <span class="r">1,2432 kg/s</span></div></div></div>
+
+<div class="step"><div class="n">5</div><div><b>Calor recuperado de los gases.</b> Se enfrían de 500 a 25 °C:
+<div class="f">Q<sub>ge</sub> = ṁ<sub>ge</sub>·c<sub>p</sub>·ΔT = 1,2432 · 1 · (500 − 25) = <span class="r">590,5 kW</span></div></div></div>
+
+<div class="step"><div class="n">6</div><div><b>Energía útil y rendimiento.</b>
+<div class="f">P<sub>e</sub> + Q<sub>refr</sub> + Q<sub>ge</sub> = 1000 + 450 + 590,5 = 2040,5 kW</div>
+<div class="f">η<sub>global</sub> = 2040,5 / 2702,7 = <span class="r">0,755 → 75,5 %</span> ✓ (solución del enunciado)</div></div></div>
+
+<h2>Apartado b) Rendimiento eléctrico equivalente (REE)</h2>
+<div class="card">El REE mide el rendimiento eléctrico que tendría la instalación si el calor útil se hubiera hecho con una caldera de referencia. Esa caldera gastaría combustible; se resta del combustible total.</div>
+<div class="f" style="font-size:1.1rem">REE = P<sub>e</sub> / (ṁ<sub>f</sub>·H<sub>c</sub> − Q<sub>útil</sub> / η<sub>caldera ref</sub>)</div>
+
+<div class="step"><div class="n">1</div><div><b>Calor útil total.</b>
+<div class="f">Q<sub>útil</sub> = 450 + 590,5 = <span class="r">1040,5 kW</span></div></div></div>
+
+<div class="step"><div class="n">2</div><div><b>Combustible que gastaría la caldera de referencia</b> (η = 0,90):
+<div class="f">1040,5 / 0,90 = <span class="r">1156,2 kW</span></div></div></div>
+
+<div class="step"><div class="n">3</div><div><b>Combustible atribuido a la electricidad.</b>
+<div class="f">2702,7 − 1156,2 = <span class="r">1546,5 kW</span></div></div></div>
+
+<div class="step"><div class="n">4</div><div><b>REE.</b>
+<div class="f">REE = 1000 / 1546,5 = <span class="r">0,647 → 64,7 %</span> ✓ (solución del enunciado)</div></div></div>
+
+<h2>Dibujo: a dónde va el combustible</h2>
+<div class="card">
+<svg viewBox="0 0 640 150" role="img" aria-label="Reparto de la potencia del combustible: electricidad, agua, gases y pérdidas">
+<text x="0" y="14" font-size="13" fill="var(--fg)" font-weight="700">Combustible: 2702,7 kW (100 %)</text>
+<rect x="0" y="24" width="640" height="34" fill="var(--l)" opacity=".35"/>
+<rect x="0" y="24" width="236.8" height="34" fill="var(--w)"/>
+<rect x="236.8" y="24" width="106.6" height="34" fill="var(--h)"/>
+<rect x="343.4" y="24" width="139.8" height="34" fill="var(--h)" opacity=".6"/>
+<rect x="483.2" y="24" width="156.8" height="34" fill="var(--l)"/>
+<text x="118" y="46" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">1000 kW</text>
+<text x="290" y="46" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">450</text>
+<text x="413" y="46" font-size="12" fill="var(--fg)" text-anchor="middle" font-weight="700">590,5</text>
+<text x="561" y="46" font-size="12" fill="var(--fg)" text-anchor="middle" font-weight="700">662,2</text>
+<text x="118" y="78" font-size="12" fill="var(--fg)" text-anchor="middle">electricidad</text>
+<text x="290" y="78" font-size="12" fill="var(--fg)" text-anchor="middle">agua</text>
+<text x="413" y="78" font-size="12" fill="var(--fg)" text-anchor="middle">gases</text>
+<text x="561" y="78" font-size="12" fill="var(--fg)" text-anchor="middle">no aprovechado</text>
+<text x="0" y="112" font-size="12" fill="var(--mu)">Útil = 2040,5 kW = 75,5 %. No aprovechado = aceite, radiación, calor de gases bajo 25 °C, etc. (2702,7 − 2040,5).</text>
+</svg></div>
+
+<h2>Trampas</h2>
+<div class="tr">
+<ul style="margin:0;padding-left:1.1rem">
+<li>La temperatura final de los gases es T<sub>amb</sub> + 10 = 25 °C, no 15 °C.</li>
+<li>El caudal de gases es aire + combustible, no solo el aire.</li>
+<li>El aire sale de F<sub>e</sub> porque el catalizador de tres vías exige mezcla estequiométrica.</li>
+<li>En el REE el calor útil se divide entre 0,90 y el resultado se resta del combustible total (no se suma).</li>
+</ul></div>
+
+<p class="mu" style="margin-top:20px">Fuente: Problemas de clase MCIA v2.1, problema 3 (Moodle UPM). Resultados comprobados contra la solución del enunciado: 75,5 % y 64,7 %.</p>
+</main>
+</body>
+</html>

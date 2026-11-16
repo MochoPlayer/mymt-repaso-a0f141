@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+<head><meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MyMT · Problema 2 · Presión de admisión</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1c2330;--mu:#5b6573;--card:#fff;--bd:#d9dde3;--ac:#1f6f5c;--ok:#1d7a3a;--bad:#b3261e;--k:#f0f4f2;--h:#e08a3c}
+@media (prefers-color-scheme:dark){:root{--bg:#161a20;--fg:#e6e9ee;--mu:#9aa4b2;--card:#1e242c;--bd:#323a46;--ac:#6fcfb6;--ok:#6fd08c;--bad:#ff8a80;--k:#222b30;--h:#d0803a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,Segoe UI,sans-serif}
+main{max-width:820px;margin:0 auto;padding:16px}
+h1{font-size:1.35rem;margin:.2em 0}h2{font-size:1.05rem;margin:1.4em 0 .4em;color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin:10px 0}
+.enun{border-left:4px solid var(--ac)}
+.f{background:var(--k);border-radius:6px;padding:6px 10px;margin:6px 0;font-family:Cambria Math,Cambria,serif;font-size:1.05rem;overflow-x:auto}
+.mu{color:var(--mu);font-size:.92rem}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+input{width:9rem;padding:6px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg);font-size:1rem}
+button{padding:6px 12px;border-radius:6px;border:1px solid var(--ac);background:var(--ac);color:var(--bg);font-size:.95rem;cursor:pointer}
+button.s{background:none;color:var(--ac)}
+.res{font-weight:700}.ok{color:var(--ok)}.bad{color:var(--bad)}
+.sol{display:none;margin-top:6px}.sol.on{display:block}
+.n{display:inline-grid;place-items:center;width:1.8rem;height:1.8rem;border-radius:50%;background:var(--ac);color:var(--bg);font-weight:700;margin-right:6px}
+.tr{background:var(--k);border-left:4px solid var(--h);padding:8px 12px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<h1>Problema 2 · Presión del aire a la entrada del motor</h1>
+<p class="mu">Máquinas y Motores Térmicos · problema de clase MCIA v2.1. Calcula cada paso, pulsa «Comprobar» y, si te atascas, «Ver cómo».</p>
+
+<div class="card enun"><b>Enunciado.</b> Motor de cuatro tiempos, turbosobrealimentado y postenfriado, de 2000 cm³ de cilindrada, a 4000 rev/min. Admite un caudal másico de aire de 0,12 kg/s y tiene un rendimiento volumétrico de 0,9. La temperatura después del postenfriador es 45 °C. Calcular la presión del aire a la entrada del motor. Dato: R<sub>aire</sub> = 287 J/kgK.<br><span class="mu">Solución del enunciado: 1,83 bar.</span></div>
+
+<h2>Idea</h2>
+<div class="card">El rendimiento volumétrico compara el aire que entra de verdad con el que cabría a la densidad de entrada. Si conocemos el caudal de aire, sacamos la densidad a la entrada. Luego, con la ecuación de gas ideal, sacamos la presión.</div>
+
+<h2>Pasos</h2>
+
+<div class="card" data-ans="33.333" data-tol="0.01">
+<div><span class="n">1</span><b>Admisiones por segundo.</b> Pasa 4000 rev/min a rev/s y divide entre 2 (en un 4T hay una admisión cada 2 vueltas).</div>
+<div class="f">n/2 = (4000 / 60) / 2</div>
+<div class="row"><input type="number" step="any" placeholder="s⁻¹"><button>Comprobar</button><button class="s">Ver cómo</button><span class="res"></span></div>
+<div class="sol">n = 4000/60 = 66,67 rev/s. Admisiones por segundo = n/2 = <b>33,33 s⁻¹</b>.</div>
+</div>
+
+<div class="card" data-ans="0.06" data-tol="0.01">
+<div><span class="n">2</span><b>Volumen de aire que podría entrar por segundo, con ηv.</b> ¿Cuántos m³/s entran en realidad?</div>
+<div class="f">V̇ = η<sub>v</sub> · V<sub>T</sub> · n/2 &nbsp;&nbsp; (V<sub>T</sub> = 2000 cm³ = 2·10⁻³ m³)</div>
+<div class="row"><input type="number" step="any" placeholder="m³/s"><button>Comprobar</button><button class="s">Ver cómo</button><span class="res"></span></div>
+<div class="sol">V̇ = 0,9 · 2·10⁻³ · 33,33 = <b>0,06 m³/s</b>. Es el volumen de aire, a las condiciones de entrada, que pasa cada segundo.</div>
+</div>
+
+<div class="card" data-ans="2" data-tol="0.01">
+<div><span class="n">3</span><b>Densidad del aire a la entrada.</b> Caudal másico entre caudal volumétrico.</div>
+<div class="f">ρ = ṁ<sub>a</sub> / V̇ = 0,12 / 0,06</div>
+<div class="row"><input type="number" step="any" placeholder="kg/m³"><button>Comprobar</button><button class="s">Ver cómo</button><span class="res"></span></div>
+<div class="sol">ρ = <b>2,0 kg/m³</b>. Es casi el doble que el aire ambiente (1,2): el turbo y el postenfriador lo han comprimido.</div>
+</div>
+
+<div class="card" data-ans="318.15" data-tol="0.002">
+<div><span class="n">4</span><b>Temperatura en kelvin.</b> La ecuación de gas ideal pide temperatura absoluta.</div>
+<div class="f">T = 45 + 273,15</div>
+<div class="row"><input type="number" step="any" placeholder="K"><button>Comprobar</button><button class="s">Ver cómo</button><span class="res"></span></div>
+<div class="sol">T = <b>318,15 K</b>. (Sirve 318 K.)</div>
+</div>
+
+<div class="card" data-ans="1.826" data-tol="0.01">
+<div><span class="n">5</span><b>Presión.</b> Ecuación de gas ideal en forma de densidad. Pon el resultado en bar (1 bar = 10⁵ Pa).</div>
+<div class="f">p = ρ · R · T = 2,0 · 287 · 318,15</div>
+<div class="row"><input type="number" step="any" placeholder="bar"><button>Comprobar</button><button class="s">Ver cómo</button><span class="res"></span></div>
+<div class="sol">p = 2,0 · 287 · 318,15 = 182 600 Pa = <b>1,83 bar</b> (absoluta) ✓ coincide con el enunciado.</div>
+</div>
+
+<h2>Resumen de la cadena</h2>
+<div class="f">ṁ<sub>a</sub> = η<sub>v</sub>·ρ·V<sub>T</sub>·n/2 &nbsp;→&nbsp; ρ = ṁ<sub>a</sub> / (η<sub>v</sub>·V<sub>T</sub>·n/2) &nbsp;→&nbsp; p = ρ·R·T</div>
+
+<h2>Trampas</h2>
+<div class="tr"><ul style="margin:0;padding-left:1.1rem">
+<li>En un 4T se divide entre 2: una admisión cada dos vueltas.</li>
+<li>Cilindrada en m³ (2000 cm³ = 0,002 m³) y régimen en rev/s.</li>
+<li>Temperatura en kelvin, no en °C.</li>
+<li>El resultado sale en Pa; pásalo a bar dividiendo entre 10⁵. Es presión absoluta, no manométrica.</li>
+<li>La densidad es la de la entrada al motor (después del postenfriador), no la del aire ambiente.</li>
+</ul></div>
+<p class="mu" style="margin-top:18px">Fuente: Problemas de clase MCIA v2.1, problema 2 (Moodle UPM).</p>
+</main>
+<script>
+document.querySelectorAll('.card[data-ans]').forEach(function(c){
+  var inp=c.querySelector('input'),res=c.querySelector('.res'),b=c.querySelectorAll('button');
+  var ans=parseFloat(c.dataset.ans),tol=parseFloat(c.dataset.tol);
+  b[0].addEventListener('click',function(){
+    var v=parseFloat(String(inp.value).replace(',','.'));
+    if(isNaN(v)){res.textContent='Escribe un número.';res.className='res bad';return}
+    if(Math.abs(v-ans)<=Math.abs(ans)*tol*3){res.textContent='Correcto ✓';res.className='res ok'}
+    else{res.textContent='No sale. Revisa unidades y el paso.';res.className='res bad'}
+  });
+  b[1].addEventListener('click',function(){c.querySelector('.sol').classList.toggle('on')});
+});
+</script>
+</body>
+</html>
